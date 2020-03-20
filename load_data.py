@@ -51,12 +51,14 @@ class Img:
 
 
 class SpleenDataset(Dataset):
-    def __init__(self, root_dir, img_range=(1,1), axis=0, transform=None):
+    def __init__(self, root_dir, img_range=(1,2), axis=0, transform=None):
         self.root_dir = root_dir
         self.transform = transform
         self.img_range = img_range
         self.cur_sample = Img(None, None, 0, 0)
         self.cur_sample.complete = True
+        self.img_num = img_range[0]
+        self.len = 0
 
         #check if there is a labels
         if self.root_dir[-1] != '/':
@@ -64,22 +66,30 @@ class SpleenDataset(Dataset):
 
         self.is_labeled = os.path.isdir(self.root_dir + LABEL_DIR)
 
-    #this is actually incorrect
+        #compute the total number of frames
+        for img_num in range(img_range[0], img_range[1]+1):
+            img_file = os.path.join(self.root_dir, TRAIN_DIR, IMG_PREFIX + str(img_num).zfill(4) + EXT)
+            print(img_file)
+            self.len += process_image(img_file, False).shape[0]
+
+        print(self.len)
+        self.img_num -= 1
+
     def __len__(self):
-        return (self.img_range[1] - self.img_range[0] + 1)*147
+        return self.len
 
     def __getitem__(self, idx):
         if torch.is_tensor(idx):
             idx = idx.tolist()
 
-        img_num = 1  #idx + self.img_range[0]
-
-
+        # if all slices of the current sample are exhausted (continue)
         if self.cur_sample.complete:
-            img_file = os.path.join(self.root_dir, TRAIN_DIR, IMG_PREFIX + str(img_num).zfill(4) + EXT)
-            label_file = os.path.join(self.root_dir, LABEL_DIR, LABEL_PREFIX + str(img_num).zfill(4) + EXT) if self.is_labeled else None
+            self.img_num += 1
+            img_file = os.path.join(self.root_dir, TRAIN_DIR, IMG_PREFIX + str(self.img_num).zfill(4) + EXT)
+            label_file = os.path.join(self.root_dir, LABEL_DIR, LABEL_PREFIX + str(self.img_num).zfill(4) + EXT) if self.is_labeled else None
 
-            self.cur_sample = Img(process_image(img_file), process_image(label_file, False), 0, 0)
+            self.cur_sample = Img(process_image(img_file), process_image(label_file, False), 0, 0) #img, label, axis, idx
+            print(self.cur_sample.img.shape)
 
         #self.cur_sample should be ready
         img_slice = self.cur_sample.img[self.cur_sample.idx, : , :]
@@ -88,13 +98,15 @@ class SpleenDataset(Dataset):
         img_label = self.cur_sample.label[self.cur_sample.idx, :, :] if self.is_labeled else np.array([])
         self.cur_sample.idx += 1
 
+        self.cur_sample.complete = self.cur_sample.idx == self.cur_sample.img.shape[0]
+
         #if we have an image label filter for the spleen
         if img_label.size != 0:
             img_label = img_label == SPLEEN_VAL
 
         img_label = img_label.astype('float32')
 
-        im = Image.fromarray(np.uint8(img_label))
+        im = Image.fromarray(np.uint8(img_slice))
         im.save('./gen/gen_' + str(idx).zfill(4) + ".png")
 
         # numpy is W x H x C
