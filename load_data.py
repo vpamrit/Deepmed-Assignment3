@@ -92,14 +92,12 @@ class SpleenDataset(Dataset):
     def get_next_slices(self):
 
         #check if the subslices are exhausted
-        if img_obj.slice_num == total_slices or :
+        if img_obj.slice_num == total_slices:
             self.cur_sample.idx += 1
-
-            self.cur_sample.complete = self.cur_sample.idx == self.cur_sample.img.shape[0]:
-
-            #return none if the current sample is fully exhausted (this is an out of bounds issue)
-            if self.cur_sample.complete:
-                raise ValueError('Dataset bounds exceeded!')
+            self.cur_sample.slice_num = 0
+            self.cur_sample.complete = self.cur_sample.idx == self.cur_sample.img.shape[0]
+        else:
+            self.cur_sample.slice_num += 1
 
         total_slices = self.num_slices * self.num_slices
 
