@@ -55,7 +55,7 @@ class Img:
 
 
 class SpleenDataset(Dataset):
-    def __init__(self, root_dir, img_range=(0,30), slice_size = 512, slice_stride = 512, num_slices = 4, transform=None):
+    def __init__(self, root_dir, img_range=(0,30), slice_size = 512, slice_stride = 512, num_slices = 1, transform=None):
         self.root_dir = root_dir
         self.transform = transform
         self.img_range = img_range
@@ -92,18 +92,19 @@ class SpleenDataset(Dataset):
     def get_next_slices(self):
 
         #check if the subslices are exhausted
-        if img_obj.slice_num == total_slices:
+        if self.cur_example.slice_num == total_slices:
             self.cur_sample.idx += 1
             self.cur_sample.slice_num = 0
             self.cur_sample.complete = self.cur_sample.idx == self.cur_sample.img.shape[0]
+        #otherwise move to next slice
         else:
             self.cur_sample.slice_num += 1
 
         total_slices = self.num_slices * self.num_slices
 
         #calculate the "coords"
-        x = img_obj.slice_num % self.num_slices
-        y = (img_obj.slice_num - x) / self.num_slices
+        x = self.cur_example.slice_num % self.num_slices
+        y = (self.cur_example.slice_num - x) / self.num_slices
 
         x = x * self.slice_stride
         y = y * self.slice_stride
