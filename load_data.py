@@ -57,7 +57,7 @@ class Img:
 
 
 class SpleenDataset(Dataset):
-    def __init__(self, root_dir, img_range=(0,10), slice_size = 200, slice_stride = 100, num_slices = 5, transform=None):
+    def __init__(self, root_dir, img_range=(0,5), slice_size = 200, slice_stride = 100, num_slices = 5, transform=None):
         self.root_dir = root_dir
         self.transform = transform
         self.img_range = img_range
@@ -102,6 +102,15 @@ class SpleenDataset(Dataset):
             self.cur_sample.slice_num = 0
             self.cur_sample.complete = (self.cur_sample.idx == self.cur_sample.img.shape[0])
 
+        # if all slices of the current sample are exhausted (continue)
+        if self.cur_sample.complete:
+            self.img_num += 1
+            img_file = os.path.join(self.root_dir, TRAIN_DIR, IMG_PREFIX + self.files[self.img_num] + EXT)
+            label_file = os.path.join(self.root_dir, LABEL_DIR, LABEL_PREFIX + self.files[self.img_num] + EXT) if self.is_labeled else None
+
+            self.cur_sample = Img(self.files[self.img_num], process_image(img_file, self.padding), process_image(label_file, self.padding, False), idx=0, slice_num=0) #img, label, axis, idx
+
+
         #calculate the "coords"
         x = self.cur_sample.slice_num % self.num_slices
         y = int((self.cur_sample.slice_num - x) / self.num_slices)
@@ -131,7 +140,8 @@ class SpleenDataset(Dataset):
 
         if SAVE_IMAGES:
             im = Image.fromarray(np.uint8(img_slice))
-            img_name = self.cur_sample.img_name
+            img_name = "{}_{}_{}".format(self.cur_sample.img_name, self.cur_sample.idx - 1, self.cur_sample.slice_num - 1)
+            print("SAVING {}".format(img_name))
             im.save('./gen/gen_' + str(img_name).zfill(4) + ".png")
             im = Image.fromarray(np.uint8(prev_img_slice))
             im.save('./gen/prev_gen_' + str(img_name).zfill(4) + ".png")
@@ -147,21 +157,14 @@ class SpleenDataset(Dataset):
     def __len__(self):
         return self.len * (self.num_slices * self.num_slices)
 
+    # TODO: this needs to work based on the index (that's how the iteration begins again!)
+    # TODO: it can just reset to previous state
     def __getitem__(self, idx):
         if torch.is_tensor(idx):
             idx = idx.tolist()
 
-        # if all slices of the current sample are exhausted (continue)
-        if self.cur_sample.complete:
-            self.img_num += 1
-            img_file = os.path.join(self.root_dir, TRAIN_DIR, IMG_PREFIX + self.files[self.img_num] + EXT)
-            label_file = os.path.join(self.root_dir, LABEL_DIR, LABEL_PREFIX + self.files[self.img_num] + EXT) if self.is_labeled else None
-
-            self.cur_sample = Img(self.files[self.img_num], process_image(img_file, self.padding), process_image(label_file, self.padding, False), idx=0, slice_num=0) #img, label, axis, idx
-
         #get the next slice
         prev_img_slice, img_slice, next_img_slice, img_label = self.get_next_slices()
-
 
         # convert to tensors
         imgcs = torch.from_numpy(img_slice).unsqueeze(0)
