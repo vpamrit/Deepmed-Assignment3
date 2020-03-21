@@ -24,7 +24,6 @@ LABEL_PREFIX = 'label'
 EXT = '.nii.gz'
 SPLEEN_VAL = 1
 
-
 def process_image(img_file, normalize=True):
 
     if not img_file:
@@ -66,9 +65,12 @@ class SpleenDataset(Dataset):
 
         self.is_labeled = os.path.isdir(self.root_dir + LABEL_DIR)
 
+        self.files = [re.findall('[0-9]{4}', filename)[0] in os.listdir(self.root_dir)]
+
+
         #compute the total number of frames
         for img_num in range(img_range[0], img_range[1]+1):
-            img_file = os.path.join(self.root_dir, TRAIN_DIR, IMG_PREFIX + str(img_num).zfill(4) + EXT)
+            img_file = os.path.join(self.root_dir, TRAIN_DIR, IMG_PREFIX + self.files[img_num] + EXT)
             print(img_file)
             self.len += process_image(img_file, False).shape[0]
 
@@ -85,8 +87,8 @@ class SpleenDataset(Dataset):
         # if all slices of the current sample are exhausted (continue)
         if self.cur_sample.complete:
             self.img_num += 1
-            img_file = os.path.join(self.root_dir, TRAIN_DIR, IMG_PREFIX + str(self.img_num).zfill(4) + EXT)
-            label_file = os.path.join(self.root_dir, LABEL_DIR, LABEL_PREFIX + str(self.img_num).zfill(4) + EXT) if self.is_labeled else None
+            img_file = os.path.join(self.root_dir, TRAIN_DIR, IMG_PREFIX + self.files[self.img_num] + EXT)
+            label_file = os.path.join(self.root_dir, LABEL_DIR, LABEL_PREFIX + self.files[self.img_num] + EXT) if self.is_labeled else None
 
             self.cur_sample = Img(process_image(img_file), process_image(label_file, False), 0, 0) #img, label, axis, idx
             print(self.cur_sample.img.shape)
