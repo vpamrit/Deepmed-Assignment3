@@ -92,8 +92,13 @@ class SpleenDataset(Dataset):
             print(self.cur_sample.img.shape)
 
         #self.cur_sample should be ready
+        prev_img_slice = self.cur_sample.img[max(self.cur_sample.idx - 1, 0), :, :]
         img_slice = self.cur_sample.img[self.cur_sample.idx, : , :]
+        next_img_slice = self.cur_sample.img[min(self.cur_sample.idx + 1, self.cur_sample.img.shape[0] - 1), :, :]
+
+        prev_img_slice = prev_img_slice.astype('float32')
         img_slice = img_slice.astype('float32')
+        next_img_slice = next_img_slice.astype('float32')
 
         img_label = self.cur_sample.label[self.cur_sample.idx, :, :] if self.is_labeled else np.array([])
         self.cur_sample.idx += 1
@@ -106,13 +111,14 @@ class SpleenDataset(Dataset):
 
         img_label = img_label.astype('float32')
 
-        im = Image.fromarray(np.uint8(img_slice))
-        im.save('./gen/gen_' + str(idx).zfill(4) + ".png")
+        #im = Image.fromarray(np.uint8(img_slice))
+        #im.save('./gen/gen_' + str(idx).zfill(4) + ".png")
 
-        # numpy is W x H x C
-        # torch is C x H x W
-        #image = torch.from_numpy(image.transpose((2, 0, 1)))
-        #label = torch.from_numpy(self.labels[idx, 1:3].astype('float').reshape(-1,2).squeeze())
+        # convert to tensors
+        imgcs = torch.from_numpy(img_slice)
+        imgns = torch.from_numpy(next_img_slice)
+        imgps = torch.from_numpy(prev_img_slice)
+        mask = torch.from_numpy(img_label)
 
-        return img_slice, img_label
+        return imgps, imgcs, imgps, mask
 

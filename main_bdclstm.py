@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import torch
 import torch.optim as optim
 from losses import DICELossMultiClass
+from load_data import SpleenDataset
 
 from torch.autograd import Variable
 from torch.utils.data import DataLoader
@@ -17,10 +18,9 @@ from models import *
 # %% import transforms
 
 UNET_MODEL_FILE = 'unetsmall-100-10-0.001'
-MODALITY = ["flair"]
 
 # %% Training settings
-parser = argparse.ArgumentParser(description='UNet+BDCLSTM for BraTS Dataset')
+parser = argparse.ArgumentParser(description='UNet+BDCLSTM')
 parser.add_argument('--batch-size', type=int, default=4, metavar='N',
                     help='input batch size for training (default: 64)')
 parser.add_argument('--test-batch-size', type=int, default=1000, metavar='N',
@@ -55,12 +55,7 @@ if args.cuda:
 DATA_FOLDER = args.data_folder
 
 # %% Loading in the Dataset
-dset_test = BraTSDatasetLSTM(
-    DATA_FOLDER, keywords=MODALITY, transform=tr.ToTensor())
-test_loader = DataLoader(
-    dset_test, batch_size=args.test_batch_size, shuffle=False, num_workers=1)
-
-dset_train = BraTSDatasetLSTM(
+dset_train = SpleenDataset(
     DATA_FOLDER, keywords=MODALITY, transform=tr.ToTensor())
 train_loader = DataLoader(
     dset_train, batch_size=args.batch_size, shuffle=True, num_workers=1)
@@ -154,13 +149,14 @@ def test(train_accuracy=False):
 if args.train:
     for i in range(args.epochs):
         train(i)
-        test()
+        #test()
 
-    torch.save(model.state_dict(),
-               'bdclstm-{}-{}-{}'.format(args.batch_size, args.epochs, args.lr))
-else:
-    model.load_state_dict(torch.load('bdclstm-{}-{}-{}'.format(args.batch_size,
+    #torch.save(model.state_dict(),
+    #           'bdclstm-{}-{}-{}'.format(args.batch_size, args.epochs, args.lr))
+#else:
+#    model.load_state_dict(torch.load('bdclstm-{}-{}-{}'.format(args.batch_size,
                                                                args.epochs,
                                                                args.lr)))
-    test()
-    test(train_accuracy=True)
+    #test()
+    #test(train_accuracy=True)
+print("Complete")
