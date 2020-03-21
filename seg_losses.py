@@ -18,7 +18,7 @@ def softmax_helper(x):
 
 def sum_tensor(inp, axes, keepdim=False):
     # copy from: https://github.com/MIC-DKFZ/nnUNet/blob/master/nnunet/utilities/tensor_utilities.py
-    axes = np.unique(axes).astype(int)
+    axes = inp.unique(axes).astype(int)
     if keepdim:
         for ax in axes:
             inp = inp.sum(int(ax), keepdim=True)
