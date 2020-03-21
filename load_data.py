@@ -92,7 +92,7 @@ class SpleenDataset(Dataset):
     def get_next_slices(self):
 
         #check if the subslices are exhausted
-        if self.cur_example.slice_num == total_slices:
+        if self.cur_sample.slice_num == total_slices:
             self.cur_sample.idx += 1
             self.cur_sample.slice_num = 0
             self.cur_sample.complete = self.cur_sample.idx == self.cur_sample.img.shape[0]
@@ -103,8 +103,8 @@ class SpleenDataset(Dataset):
         total_slices = self.num_slices * self.num_slices
 
         #calculate the "coords"
-        x = self.cur_example.slice_num % self.num_slices
-        y = (self.cur_example.slice_num - x) / self.num_slices
+        x = self.cur_sample.slice_num % self.num_slices
+        y = (self.cur_sample.slice_num - x) / self.num_slices
 
         x = x * self.slice_stride
         y = y * self.slice_stride
