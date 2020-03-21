@@ -99,9 +99,6 @@ class SpleenDataset(Dataset):
             self.cur_sample.idx += 1
             self.cur_sample.slice_num = 0
             self.cur_sample.complete = self.cur_sample.idx == self.cur_sample.img.shape[0]
-        #otherwise move to next slice
-        else:
-            self.cur_sample.slice_num += 1
 
         #calculate the "coords"
         x = self.cur_sample.slice_num % self.num_slices
@@ -126,6 +123,9 @@ class SpleenDataset(Dataset):
             img_label = np.stack((img_label == SPLEEN_VAL, img_label != SPLEEN_VAL), axis=0)
 
         img_label = img_label.astype('float32')
+
+        # move to the next slice
+        self.cur_sample.slice_num += 1
 
         #update the current object's status
         return prev_img_slice, img_slice, next_img_slice, img_label
