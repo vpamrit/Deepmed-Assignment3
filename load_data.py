@@ -102,7 +102,7 @@ class SpleenDataset(Dataset):
 
         #calculate the "coords"
         x = self.cur_sample.slice_num % self.num_slices
-        y = (self.cur_sample.slice_num - x) / self.num_slices
+        y = int((self.cur_sample.slice_num - x) / self.num_slices)
 
         print("X: {}, Y: {}".format(x, y))
 
