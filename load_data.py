@@ -115,10 +115,10 @@ class SpleenDataset(Dataset):
         #im.save('./gen/gen_' + str(idx).zfill(4) + ".png")
 
         # convert to tensors
-        imgcs = torch.from_numpy(img_slice)
-        imgns = torch.from_numpy(next_img_slice)
-        imgps = torch.from_numpy(prev_img_slice)
-        mask = torch.from_numpy(img_label)
+        imgcs = torch.from_numpy(img_slice).unsqueeze(0)
+        imgns = torch.from_numpy(next_img_slice).unsqueeze(0)
+        imgps = torch.from_numpy(prev_img_slice).unsqueeze(0)
+        mask = torch.from_numpy(img_label).unsqueeze(0)
 
         return imgps, imgcs, imgps, mask
 

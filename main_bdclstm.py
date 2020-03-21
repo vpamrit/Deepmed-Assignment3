@@ -11,7 +11,6 @@ from torch.autograd import Variable
 from torch.utils.data import DataLoader
 import torchvision.transforms as tr
 
-from data import BraTSDatasetLSTM
 from CLSTM import BDCLSTM
 from models import *
 
@@ -31,19 +30,17 @@ parser.add_argument('--epochs', type=int, default=1, metavar='N',
                     help='number of epochs to train (default: 10)')
 parser.add_argument('--lr', type=float, default=0.001, metavar='LR',
                     help='learning rate (default: 0.01)')
-parser.add_argument('--mom', type=float, default=0.99, metavar='MOM',
-                    help='SGD momentum (default=0.99)')
+parser.add_argument('--mom', type=float, default=0.99, metavar='MOM', help='SGD momentum')
 parser.add_argument('--cuda', action='store_true', default=False,
                     help='enables CUDA training (default: False)')
-parser.add_argument('--log-interval', type=int, default=1, metavar='N',
-                    help='batches to wait before logging training status')
+parser.add_argument('--log-interval', type=int, default=1, metavar='N', help='batches to wait before logging training status')
 parser.add_argument('--test-dataset', action='store_true', default=False,
                     help='test on smaller dataset (default: False)')
 parser.add_argument('--size', type=int, default=128, metavar='N',
                     help='imsize')
 parser.add_argument('--drop', action='store_true', default=False,
                     help='enables drop')
-parser.add_argument('--data-folder', type=str, default='./Data-Nonzero/', metavar='str',
+parser.add_argument('--data-folder', type=str, default='./data/Training/', metavar='str',
                     help='folder that contains data (default: test dataset)')
 
 
@@ -55,8 +52,7 @@ if args.cuda:
 DATA_FOLDER = args.data_folder
 
 # %% Loading in the Dataset
-dset_train = SpleenDataset(
-    DATA_FOLDER, keywords=MODALITY, transform=tr.ToTensor())
+dset_train = SpleenDataset(DATA_FOLDER, img_range=(1, 10))
 train_loader = DataLoader(
     dset_train, batch_size=args.batch_size, shuffle=True, num_workers=1)
 
@@ -154,9 +150,7 @@ if args.train:
     #torch.save(model.state_dict(),
     #           'bdclstm-{}-{}-{}'.format(args.batch_size, args.epochs, args.lr))
 #else:
-#    model.load_state_dict(torch.load('bdclstm-{}-{}-{}'.format(args.batch_size,
-                                                               args.epochs,
-                                                               args.lr)))
+#    model.load_state_dict(torch.load('bdclstm-{}-{}-{}'.format(args.batch_size, args.epochs,args.lr)))
     #test()
     #test(train_accuracy=True)
 print("Complete")
