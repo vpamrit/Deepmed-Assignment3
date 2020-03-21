@@ -17,7 +17,7 @@ from os.path import join, isfile
 from os import listdir
 
 #constants
-SAVE_IMAGES = True
+SAVE_IMAGES = False
 TRAIN_DIR = 'img/'
 IMG_PREFIX = 'img'
 LABEL_DIR = 'label/'
