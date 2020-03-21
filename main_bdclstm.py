@@ -94,6 +94,8 @@ def train(epoch):
         map3 = unet(image3, return_features=True)
 
         output = model(map1, map2, map3)
+
+        print("Mask size is {}".format(mask.size()))
         loss = criterion(output, mask)
 
         loss.backward()
