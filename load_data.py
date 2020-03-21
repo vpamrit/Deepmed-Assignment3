@@ -63,9 +63,9 @@ class SpleenDataset(Dataset):
         self.cur_sample.complete = True
         self.img_num = img_range[0]
         self.len = 0
-        self.slice_size = slice_size
-        self.slice_stride = slice_stride
-        self.num_slices = num_slices
+        self.slice_size = int(slice_size)
+        self.slice_stride = int(slice_stride)
+        self.num_slices = int(num_slices)
         self.total_slices = num_slices * num_slices
 
 
@@ -106,6 +106,8 @@ class SpleenDataset(Dataset):
         #calculate the "coords"
         x = self.cur_sample.slice_num % self.num_slices
         y = (self.cur_sample.slice_num - x) / self.num_slices
+
+        print("X: {}, Y: {}".format(x, y))
 
         x = x * self.slice_stride
         y = y * self.slice_stride
