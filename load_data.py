@@ -64,6 +64,7 @@ class SpleenDataset(Dataset):
         self.img_num = img_range[0]
         self.len = 0
         self.slice_size = slice_size
+        self.slice_stride = slice_stride
         self.num_slices = num_slices
         self.total_slices = num_slices * num_slices
 
