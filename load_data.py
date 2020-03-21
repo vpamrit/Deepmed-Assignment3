@@ -65,6 +65,8 @@ class SpleenDataset(Dataset):
         self.len = 0
         self.slice_size = slice_size
         self.num_slices = num_slices
+        self.total_slices = num_slices * num_slices
+
 
         #compute the padding here
         self.padding = (num_slices * (slice_size - slice_stride) + slice_size - 512) / 2
@@ -85,22 +87,20 @@ class SpleenDataset(Dataset):
             print(img_file)
             self.len += process_image(img_file, padding=0, normalize=False).shape[0]
 
-        print("Dataset details\n  2D Slices: {}, Subslices {}, Padding-Margin: {}".format(self.len, self.num_slices * self.num_slices, self.padding))
+        print("Dataset details\n  2D Slices: {}, Subslices {}, Padding-Margin: {}".format(self.len, self.total_slices, self.padding))
         self.img_num -= 1
 
     #return start of next slice for the current sample
     def get_next_slices(self):
 
         #check if the subslices are exhausted
-        if self.cur_sample.slice_num == total_slices:
+        if self.cur_sample.slice_num == self.total_slices:
             self.cur_sample.idx += 1
             self.cur_sample.slice_num = 0
             self.cur_sample.complete = self.cur_sample.idx == self.cur_sample.img.shape[0]
         #otherwise move to next slice
         else:
             self.cur_sample.slice_num += 1
-
-        total_slices = self.num_slices * self.num_slices
 
         #calculate the "coords"
         x = self.cur_sample.slice_num % self.num_slices
