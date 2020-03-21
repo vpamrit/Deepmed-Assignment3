@@ -110,7 +110,7 @@ def train(epoch):
                 100. * batch_idx / len(train_loader), loss.item()))
 
     #here we can compute the average dice coefficient on the remaining dataset
-    valid_loader = DataLoader(dset_valid, batch_size=args.batch_size, num_workers=1)
+    valid_loader = DataLoader(dset_valid, batch_size=1, num_workers=1)
     model.eval()
 
     total_loss = 0
