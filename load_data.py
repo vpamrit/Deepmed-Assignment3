@@ -140,7 +140,7 @@ class SpleenDataset(Dataset):
 
         if SAVE_IMAGES:
             im = Image.fromarray(np.uint8(img_slice))
-            img_name = "{}_{}_{}".format(self.cur_sample.img_name, self.cur_sample.idx - 1, self.cur_sample.slice_num - 1)
+            img_name = "{}_{}_{}".format(self.cur_sample.img_name, self.cur_sample.idx, self.cur_sample.slice_num - 1)
             print("SAVING {}".format(img_name))
             im.save('./gen/gen_' + str(img_name).zfill(4) + ".png")
             im = Image.fromarray(np.uint8(prev_img_slice))
