@@ -54,12 +54,13 @@ DATA_FOLDER = args.data_folder
 
 # %% Loading in the Dataset
 dset_train = SpleenDataset(DATA_FOLDER, img_range=(1, 10))
-train_loader = DataLoader(
-    dset_train, batch_size=args.batch_size, shuffle=True, num_workers=1)
+dset_valid = SpleenDataset(DATA_FOLDER, img_range=(10, 15))
+
+train_loader = DataLoader(dset_train, batch_size=args.batch_size, num_workers=1)
 
 
 # %% Loading in the models
-unet = UNetSmall(num_classes=2)
+unet = UNet(num_classes=2)
 #unet.load_state_dict(torch.load(UNET_MODEL_FILE))
 model = BDCLSTM(input_channels=32, hidden_channels=[32], num_classes=2)
 
@@ -105,6 +106,9 @@ def train(epoch):
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                 epoch, batch_idx * len(image1), len(train_loader.dataset),
                 100. * batch_idx / len(train_loader), loss.item()))
+
+    #here we can compute the average dice coefficient on the remaining dataset
+    valid_loader = DataLoader(dset_valid, batch_size=args.batch_size, num_workers=1)
 
 
 def test(train_accuracy=False):
