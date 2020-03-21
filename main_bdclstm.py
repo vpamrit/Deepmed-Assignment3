@@ -73,7 +73,7 @@ if args.cuda:
 optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.mom)
 criterion = TverskyLoss() #DICELoss()
 
-diceLoss  = DiceLosses.DiceLoss()
+#diceLoss  = DiceLosses.DiceLoss()
 # Define Training Loop
 
 
