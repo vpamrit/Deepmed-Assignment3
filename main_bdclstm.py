@@ -54,8 +54,8 @@ if args.cuda:
 DATA_FOLDER = args.data_folder
 
 # %% Loading in the Dataset
-dset_train = SpleenDataset(DATA_FOLDER, img_range=(0, 1))
-dset_valid = SpleenDataset(DATA_FOLDER, img_range=(11, 15))
+dset_train = SpleenDataset(DATA_FOLDER, img_range=(0, 0))
+dset_valid = SpleenDataset(DATA_FOLDER, img_range=(1, 1))
 
 train_loader = DataLoader(dset_train, batch_size=args.batch_size, num_workers=1)
 
