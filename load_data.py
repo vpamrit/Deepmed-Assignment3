@@ -110,6 +110,7 @@ class SpleenDataset(Dataset):
 
             #reset to the first image if at the end
             if self.img_num == self.last_img + 1:
+                print("------------------- NEXT EPOCH -----------------------")
                 self.img_num = self.first_img
 
             img_file = os.path.join(self.root_dir, TRAIN_DIR, IMG_PREFIX + self.files[self.img_num] + EXT)
