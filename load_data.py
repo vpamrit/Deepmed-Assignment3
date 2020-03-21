@@ -85,7 +85,7 @@ class SpleenDataset(Dataset):
             print(img_file)
             self.len += process_image(img_file, padding=0, normalize=False).shape[0]
 
-        print(self.len)
+        print("Dataset details\n  2D Slices: {}, Subslices {}, Padding-Margin: {}".format(self.len, self.num_slices * self.num_slices, self.padding))
         self.img_num -= 1
 
     #return start of next slice for the current sample
@@ -127,7 +127,7 @@ class SpleenDataset(Dataset):
         return prev_img_slice, img_slice, next_img_slice, img_label
 
     def __len__(self):
-        return self.len
+        return self.len * (self.num_slices * self.num_slices)
 
     def __getitem__(self, idx):
         if torch.is_tensor(idx):
@@ -142,7 +142,7 @@ class SpleenDataset(Dataset):
             self.cur_sample = Img(process_image(img_file, self.padding), process_image(label_file, self.padding, False), idx=0, slice_num=0) #img, label, axis, idx
 
         #get the next slice
-        prev_img_slice, img_slice, next_img_slice, img_label = self.get_next_slices(self.cur_sample)
+        prev_img_slice, img_slice, next_img_slice, img_label = self.get_next_slices()
 
         #im = Image.fromarray(np.uint8(img_slice))
         #im.save('./gen/gen_' + str(idx).zfill(4) + ".png")
