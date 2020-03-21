@@ -63,7 +63,7 @@ train_loader = DataLoader(
 
 # %% Loading in the models
 unet = UNetSmall()
-unet.load_state_dict(torch.load(UNET_MODEL_FILE))
+#unet.load_state_dict(torch.load(UNET_MODEL_FILE))
 model = BDCLSTM(input_channels=32, hidden_channels=[32])
 
 if args.cuda:
