@@ -57,7 +57,7 @@ class Img:
 
 
 class SpleenDataset(Dataset):
-    def __init__(self, root_dir, img_range=(0,5), slice_size = 200, slice_stride = 100, num_slices = 5, transform=None):
+    def __init__(self, root_dir, img_range=(0,1), slice_size = 240, slice_stride = 80, num_slices = 5, transform=None):
         self.root_dir = root_dir
         self.transform = transform
         self.img_range = img_range
@@ -144,11 +144,11 @@ class SpleenDataset(Dataset):
             print("SAVING {}".format(img_name))
             im.save('./gen/gen_' + str(img_name).zfill(4) + ".png")
             im = Image.fromarray(np.uint8(prev_img_slice))
-            im.save('./gen/prev_gen_' + str(img_name).zfill(4) + ".png")
+            im.save('./gen/gen_' + str(img_name).zfill(4) + "_prev.png")
             im = Image.fromarray(np.uint8(next_img_slice))
-            im.save('./gen/next_gen_' + str(img_name).zfill(4) + ".png")
+            im.save('./gen/gen_' + str(img_name).zfill(4) + "_next.png")
             im = Image.fromarray(np.uint8(img_label[0, :, :])*125)
-            im.save('./gen/mask_gen_' + str(img_name).zfill(4) + ".png")
+            im.save('./gen/gen_' + str(img_name).zfill(4) + "_mask.png")
 
 
         #update the current object's status
