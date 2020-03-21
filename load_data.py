@@ -65,7 +65,7 @@ class SpleenDataset(Dataset):
 
         self.is_labeled = os.path.isdir(self.root_dir + LABEL_DIR)
 
-        self.files = [re.findall('[0-9]{4}', filename)[0] for filename in os.listdir(self.root_dir)]
+        self.files = [re.findall('[0-9]{4}', filename)[0] for filename in os.listdir(self.root_dir + TRAIN_DIR)]
 
 
         #compute the total number of frames
