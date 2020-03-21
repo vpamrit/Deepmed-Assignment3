@@ -73,7 +73,7 @@ if args.cuda:
 optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.mom)
 criterion = TverskyLoss() #DICELoss()
 
-diceCoefficient = DiceLosses.DiceLoss()
+diceLoss = DiceLosses.DiceLoss()
 
 # Define Training Loop
 
@@ -129,12 +129,12 @@ def train(epoch):
 
              output = model(map1, map2, map3)
 
-             loss = criterion(output, mask)
+             loss = diceLoss(output, mask)
              total += loss.item()
 
     print('Validation Epoch: {} Loss, {} Avg Loss'.format(total, total / len(valid_loader.dataset)))
 
-    #calculate dice coefficient
+    #calculate dice coefficient (on validation for the whole segmentations)
 
 
 def test(train_accuracy=False):
