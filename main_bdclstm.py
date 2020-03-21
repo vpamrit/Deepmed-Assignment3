@@ -4,6 +4,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import torch
 import torch.optim as optim
+import DiceLosses
 from losses import DICELossMultiClass, DICELoss
 from seg_losses import TverskyLoss
 from load_data import SpleenDataset
@@ -72,6 +73,8 @@ if args.cuda:
 optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.mom)
 criterion = TverskyLoss() #DICELoss()
 
+diceCoefficient = DiceLosses.DiceLoss()
+
 # Define Training Loop
 
 
@@ -109,6 +112,29 @@ def train(epoch):
 
     #here we can compute the average dice coefficient on the remaining dataset
     valid_loader = DataLoader(dset_valid, batch_size=args.batch_size, num_workers=1)
+    model.eval()
+
+    total_loss = 0
+
+    for batch_idx, (image1, image2, image3, mask) in enumerate(valid_loader):
+        with torch.no_grad:
+            image1, image2, image3, mask = image1.cuda(), \
+                 image2.cuda(), \
+                 image3.cuda(), \
+                 mask.cuda()
+
+             map1 = unet(image1, return_features=True)
+             map2 = unet(image2, return_features=True)
+             map3 = unet(image3, return_features=True)
+
+             output = model(map1, map2, map3)
+
+             loss = criterion(output, mask)
+             total += loss.item()
+
+    print('Validation Epoch: {} Loss, {} Avg Loss'.format(total, total / len(valid_loader.dataset)))
+
+    #calculate dice coefficient
 
 
 def test(train_accuracy=False):
