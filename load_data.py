@@ -40,7 +40,7 @@ def process_image(img_file, padding=0, normalize=True):
     img = np.transpose(img, (2,0,1))
 
     if padding != 0:
-        npad = ((0, 0), (self.padding, self.padding), (self.padding, self.padding))
+        npad = ((0, 0), (padding, padding), (padding, padding))
         img = np.pad(img, pad_width=npad, mode='constant', constant_values=0)
 
     return img
