@@ -70,7 +70,7 @@ class SpleenDataset(Dataset):
 
 
         #compute the padding here
-        self.padding = ( (num_slices - 1) * slice_stride + slice_size - 512) / 2
+        self.padding = int (( (num_slices - 1) * slice_stride + slice_size - 512) / 2)
         self.window_size = slice_size - self.padding * 2
 
         #check if there is a labels
