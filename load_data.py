@@ -118,7 +118,7 @@ class SpleenDataset(Dataset):
         imgcs = torch.from_numpy(img_slice).unsqueeze(0)
         imgns = torch.from_numpy(next_img_slice).unsqueeze(0)
         imgps = torch.from_numpy(prev_img_slice).unsqueeze(0)
-        mask = torch.from_numpy(img_label).unsqueeze(0)
+        mask = torch.from_numpy(img_label) #already has a fourth dimension
 
         return imgps, imgcs, imgps, mask
 
