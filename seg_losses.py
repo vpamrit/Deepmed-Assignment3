@@ -114,6 +114,8 @@ class GDiceLoss(nn.Module):
 
         if self.apply_nonlin is not None:
             softmax_output = self.apply_nonlin(net_output)
+        else:
+            softmax_output = net_output
 
         # copy from https://github.com/LIVIAETS/surface-loss/blob/108bd9892adca476e6cdf424124bc6268707498e/losses.py#L29
         w: torch.Tensor = 1 / (einsum("bcxy->bc", y_onehot).type(torch.float32) + 1e-10)**2
@@ -173,6 +175,8 @@ class GDiceLossV2(nn.Module):
 
         if self.apply_nonlin is not None:
             softmax_output = self.apply_nonlin(net_output)
+        else:
+            softmax_output = net_output
 
         input = flatten(softmax_output)
         target = flatten(y_onehot)
@@ -231,6 +235,8 @@ class SSLoss(nn.Module):
 
         if self.apply_nonlin is not None:
             softmax_output = self.apply_nonlin(net_output)
+        else:
+            softmax_output = net_output
 
         # no object value
         bg_onehot = 1 - y_onehot
