@@ -4,7 +4,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import torch
 import torch.optim as optim
-from losses import DICELossMultiClass
+from losses import DICELossMultiClass, DICELoss
 from load_data import SpleenDataset
 
 from torch.autograd import Variable
@@ -68,7 +68,7 @@ if args.cuda:
 
 # Setting Optimizer
 optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.mom)
-criterion = DICELossMultiClass()
+criterion = DICELoss()
 
 # Define Training Loop
 
