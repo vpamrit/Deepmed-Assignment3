@@ -113,27 +113,27 @@ def train(epoch):
     valid_loader = DataLoader(dset_valid, batch_size=1, num_workers=1)
     model.eval()
 
-    #total_loss = 0
+    total_loss = 0
 
-    #for batch_idx, (image1, image2, image3, mask) in enumerate(valid_loader):
-    #    with torch.no_grad():
-    #        image1, image2, image3, mask = image1.cuda(), \
-    #             image2.cuda(), \
-    #             image3.cuda(), \
-    #             mask.cuda()
+    for batch_idx, (image1, image2, image3, mask) in enumerate(valid_loader):
+        with torch.no_grad():
+            image1, image2, image3, mask = image1.cuda(), \
+                 image2.cuda(), \
+                 image3.cuda(), \
+                 mask.cuda()
 
-    #        map1 = unet(image1, return_features=True)
-    #        map2 = unet(image2, return_features=True)
-    #        map3 = unet(image3, return_features=True)
+            map1 = unet(image1, return_features=True)
+            map2 = unet(image2, return_features=True)
+            map3 = unet(image3, return_features=True)
 
-    #        output = model(map1, map2, map3)
+            output = model(map1, map2, map3)
 
-    #        loss = diceLoss(output, mask)
-    #        total_loss += loss.item()
+            loss = diceLoss(output, mask)
+            total_loss += loss.item()
 
-    #print('Validation Epoch: {} Loss, {} Avg Loss'.format(total_loss, total_loss / len(valid_loader.dataset)))
+    print('Validation Epoch: {} Loss, {} Avg Loss'.format(total_loss, total_loss / len(valid_loader.dataset)))
 
-    #calculate dice coefficient (on validation for the whole segmentations)
+    calculate dice coefficient (on validation for the whole segmentations)
 
 
 def test(train_accuracy=False):
