@@ -4,7 +4,6 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import torch
 import torch.optim as optim
-import DiceLosses
 from losses import DICELossMultiClass, DICELoss
 from seg_losses import TverskyLoss
 from load_data import SpleenDataset
@@ -73,7 +72,7 @@ if args.cuda:
 optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.mom)
 criterion = TverskyLoss() #DICELoss()
 
-diceLoss = DiceLosses.DiceLoss()
+#criterion = DiceLosses.DiceLoss()
 
 # Define Training Loop
 
@@ -129,7 +128,7 @@ def train(epoch):
 
             output = model(map1, map2, map3)
 
-            loss = diceLoss(output, mask)
+            loss = criterion(output, mask)
             total += loss.item()
 
     print('Validation Epoch: {} Loss, {} Avg Loss'.format(total, total / len(valid_loader.dataset)))
