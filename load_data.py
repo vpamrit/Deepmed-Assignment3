@@ -55,7 +55,7 @@ class Img:
 
 
 class SpleenDataset(Dataset):
-    def __init__(self, root_dir, img_range=(0,30), slice_size = 512, slice_stride = 512, num_slices = 1, transform=None):
+    def __init__(self, root_dir, img_range=(0,30), slice_size = 256, slice_stride = 256, num_slices = 2, transform=None):
         self.root_dir = root_dir
         self.transform = transform
         self.img_range = img_range
