@@ -53,14 +53,14 @@ if args.cuda:
 DATA_FOLDER = args.data_folder
 
 # %% Loading in the Dataset
-dset_train = SpleenDataset(DATA_FOLDER, img_range=(1, 10))
-dset_valid = SpleenDataset(DATA_FOLDER, img_range=(10, 15))
+dset_train = SpleenDataset(DATA_FOLDER, img_range=(0, 10))
+dset_valid = SpleenDataset(DATA_FOLDER, img_range=(11, 15))
 
 train_loader = DataLoader(dset_train, batch_size=args.batch_size, num_workers=1)
 
 
 # %% Loading in the models
-unet = UNet(num_classes=2)
+unet = UNetSmall(num_classes=2)
 #unet.load_state_dict(torch.load(UNET_MODEL_FILE))
 model = BDCLSTM(input_channels=32, hidden_channels=[32], num_classes=2)
 
@@ -73,7 +73,6 @@ optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.mom)
 criterion = TverskyLoss() #DICELoss()
 
 #criterion = DiceLosses.DiceLoss()
-
 # Define Training Loop
 
 
