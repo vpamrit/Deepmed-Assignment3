@@ -129,9 +129,9 @@ def train(epoch):
             output = model(map1, map2, map3)
 
             loss = diceLoss(output, mask)
-            total += loss.item()
+            total_loss += loss.item()
 
-    print('Validation Epoch: {} Loss, {} Avg Loss'.format(total, total / len(valid_loader.dataset)))
+    print('Validation Epoch: {} Loss, {} Avg Loss'.format(total_loss, total_loss / len(valid_loader.dataset)))
 
     #calculate dice coefficient (on validation for the whole segmentations)
 
