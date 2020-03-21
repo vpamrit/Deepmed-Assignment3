@@ -123,14 +123,14 @@ def train(epoch):
                  image3.cuda(), \
                  mask.cuda()
 
-             map1 = unet(image1, return_features=True)
-             map2 = unet(image2, return_features=True)
-             map3 = unet(image3, return_features=True)
+            map1 = unet(image1, return_features=True)
+            map2 = unet(image2, return_features=True)
+            map3 = unet(image3, return_features=True)
 
-             output = model(map1, map2, map3)
+            output = model(map1, map2, map3)
 
-             loss = diceLoss(output, mask)
-             total += loss.item()
+            loss = diceLoss(output, mask)
+            total += loss.item()
 
     print('Validation Epoch: {} Loss, {} Avg Loss'.format(total, total / len(valid_loader.dataset)))
 
