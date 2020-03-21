@@ -56,7 +56,7 @@ class DICELoss(nn.Module):
         probs = torch.squeeze(output, 1)
         mask = torch.squeeze(mask, 1)
 
-        print("Size of probs {} and size of mask".format(probs.size(), mask.size()))
+        #print("Size of probs {} and size of mask".format(probs.size(), mask.size()))
 
         intersection = probs * mask
         intersection = torch.sum(intersection, 2)
