@@ -24,7 +24,7 @@ LABEL_PREFIX = 'label'
 EXT = '.nii.gz'
 SPLEEN_VAL = 1
 
-def process_image(img_file, normalize=True):
+def process_image(img_file, padding=0, normalize=True):
 
     if not img_file:
         return None
@@ -36,21 +36,26 @@ def process_image(img_file, normalize=True):
         img = (img - img.min()) / (img.max() - img.min())
         img = img * 255.0
 
+
     img = np.transpose(img, (2,0,1))
+
+    if padding != 0:
+        npad = ((0, 0), (self.padding, self.padding), (self.padding, self.padding))
+        img = np.pad(img, pad_width=npad, mode='constant', constant_values=0)
 
     return img
 
 class Img:
-    def __init__(self, img, label , axis, idx):
+    def __init__(self, img, label , idx, slice_num):
         self.img = img
         self.label = label
-        self.axis = axis
         self.idx = idx
+        self.slice_num = slice_num
         self.complete = False
 
 
 class SpleenDataset(Dataset):
-    def __init__(self, root_dir, img_range=(0,30), axis=0, transform=None):
+    def __init__(self, root_dir, img_range=(0,30), slice_size = 512, slice_stride = 512, num_slices = 4, transform=None):
         self.root_dir = root_dir
         self.transform = transform
         self.img_range = img_range
@@ -58,6 +63,12 @@ class SpleenDataset(Dataset):
         self.cur_sample.complete = True
         self.img_num = img_range[0]
         self.len = 0
+        self.slice_size = slice_size
+        self.num_slices = num_slices
+
+        #compute the padding here
+        self.padding = (num_slices * (slice_size - slice_stride) + slice_size - 512) / 2
+        self.window_size = slice_size - self.padding * 2
 
         #check if there is a labels
         if self.root_dir[-1] != '/':
@@ -68,15 +79,54 @@ class SpleenDataset(Dataset):
         self.files = [re.findall('[0-9]{4}', filename)[0] for filename in os.listdir(self.root_dir + TRAIN_DIR)]
         self.files = sorted(self.files, key = lambda f : int(f))
 
-
         #compute the total number of frames
         for img_num in range(img_range[0], img_range[1]+1):
             img_file = os.path.join(self.root_dir, TRAIN_DIR, IMG_PREFIX + self.files[img_num] + EXT)
             print(img_file)
-            self.len += process_image(img_file, False).shape[0]
+            self.len += process_image(img_file, padding=0, normalize=False).shape[0]
 
         print(self.len)
         self.img_num -= 1
+
+    #return start of next slice for the current sample
+    def get_next_slices(self):
+
+        #check if the subslices are exhausted
+        if img_obj.slice_num == total_slices or :
+            self.cur_sample.idx += 1
+
+            self.cur_sample.complete = self.cur_sample.idx == self.cur_sample.img.shape[0]:
+
+            #return none if the current sample is fully exhausted (this is an out of bounds issue)
+            if self.cur_sample.complete:
+                raise ValueError('Dataset bounds exceeded!')
+
+        total_slices = self.num_slices * self.num_slices
+
+        #calculate the "coords"
+        x = img_obj.slice_num % self.num_slices
+        y = (img_obj.slice_num - x) / self.num_slices
+
+        x = x * self.slice_stride
+        y = y * self.slice_stride
+
+        ex = x + self.slice_size
+        ey = y + self.slice_size
+
+        prev_img_slice = self.cur_sample.img[max(self.cur_sample.idx - 1, 0), x:ex, y:ey].astype('float32')
+        img_slice = self.cur_sample.img[self.cur_sample.idx, x:ex, y:ey].astype('float32')
+        next_img_slice = self.cur_sample.img[min(self.cur_sample.idx + 1, self.cur_sample.img.shape[0] - 1), x:ex, y:ey].astype('float32')
+
+        img_label = self.cur_sample.label[self.cur_sample.idx, x:ex, y:ey] if self.is_labeled else np.array([])
+
+        #if we have an image label filter for the spleen
+        if img_label.size != 0:
+            img_label = np.stack((img_label == SPLEEN_VAL, img_label != SPLEEN_VAL), axis=0)
+
+        img_label = img_label.astype('float32')
+
+        #update the current object's status
+        return prev_img_slice, img_slice, next_img_slice, img_label
 
     def __len__(self):
         return self.len
@@ -91,28 +141,10 @@ class SpleenDataset(Dataset):
             img_file = os.path.join(self.root_dir, TRAIN_DIR, IMG_PREFIX + self.files[self.img_num] + EXT)
             label_file = os.path.join(self.root_dir, LABEL_DIR, LABEL_PREFIX + self.files[self.img_num] + EXT) if self.is_labeled else None
 
-            self.cur_sample = Img(process_image(img_file), process_image(label_file, False), 0, 0) #img, label, axis, idx
-            print(self.cur_sample.img.shape)
+            self.cur_sample = Img(process_image(img_file, self.padding), process_image(label_file, self.padding, False), idx=0, slice_num=0) #img, label, axis, idx
 
-        #self.cur_sample should be ready
-        prev_img_slice = self.cur_sample.img[max(self.cur_sample.idx - 1, 0), :, :]
-        img_slice = self.cur_sample.img[self.cur_sample.idx, : , :]
-        next_img_slice = self.cur_sample.img[min(self.cur_sample.idx + 1, self.cur_sample.img.shape[0] - 1), :, :]
-
-        prev_img_slice = prev_img_slice.astype('float32')
-        img_slice = img_slice.astype('float32')
-        next_img_slice = next_img_slice.astype('float32')
-
-        img_label = self.cur_sample.label[self.cur_sample.idx, :, :] if self.is_labeled else np.array([])
-        self.cur_sample.idx += 1
-
-        self.cur_sample.complete = self.cur_sample.idx == self.cur_sample.img.shape[0]
-
-        #if we have an image label filter for the spleen
-        if img_label.size != 0:
-            img_label = np.stack((img_label == SPLEEN_VAL, img_label != SPLEEN_VAL), axis=0)
-
-        img_label = img_label.astype('float32')
+        #get the next slice
+        prev_img_slice, img_slice, next_img_slice, img_label = self.get_next_slices(self.cur_sample)
 
         #im = Image.fromarray(np.uint8(img_slice))
         #im.save('./gen/gen_' + str(idx).zfill(4) + ".png")
