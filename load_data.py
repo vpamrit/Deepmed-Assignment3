@@ -64,6 +64,8 @@ class SpleenDataset(Dataset):
         self.cur_sample = Img(None, None, None, 0, 0)
         self.cur_sample.complete = True
         self.img_num = img_range[0]
+        self.first_img = img_range[0]
+        self.last_img = img_range[1]
         self.len = 0
         self.slice_size = int(slice_size)
         self.slice_stride = int(slice_stride)
@@ -90,7 +92,7 @@ class SpleenDataset(Dataset):
             print(img_file)
             self.len += process_image(img_file, padding=0, normalize=False).shape[0]
 
-        print("Dataset details\n  2D Slices: {}, Subslices {}, Padding-Margin: {}".format(self.len, self.total_slices, self.padding))
+        print("Dataset details\n  Images: {}, 2D Slices: {}, Subslices {}, Padding-Margin: {}".format(self.last_img - self.first_img + 1, self.len, self.total_slices, self.padding))
         self.img_num -= 1
 
     #return start of next slice for the current sample
@@ -105,6 +107,11 @@ class SpleenDataset(Dataset):
         # if all slices of the current sample are exhausted (continue)
         if self.cur_sample.complete:
             self.img_num += 1
+
+            #reset to the first image if at the end
+            if self.img_num == self.last_img + 1:
+                self.img_num = self.first_img
+
             img_file = os.path.join(self.root_dir, TRAIN_DIR, IMG_PREFIX + self.files[self.img_num] + EXT)
             label_file = os.path.join(self.root_dir, LABEL_DIR, LABEL_PREFIX + self.files[self.img_num] + EXT) if self.is_labeled else None
 
