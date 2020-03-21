@@ -17,6 +17,7 @@ from os.path import join, isfile
 from os import listdir
 
 #constants
+SAVE_IMAGES = True
 TRAIN_DIR = 'img/'
 IMG_PREFIX = 'img'
 LABEL_DIR = 'label/'
@@ -46,7 +47,8 @@ def process_image(img_file, padding=0, normalize=True):
     return img
 
 class Img:
-    def __init__(self, img, label , idx, slice_num):
+    def __init__(self, img_name, img, label , idx, slice_num):
+        self.img_name = img_name
         self.img = img
         self.label = label
         self.idx = idx
@@ -55,11 +57,11 @@ class Img:
 
 
 class SpleenDataset(Dataset):
-    def __init__(self, root_dir, img_range=(0,30), slice_size = 200, slice_stride = 100, num_slices = 5, transform=None):
+    def __init__(self, root_dir, img_range=(0,10), slice_size = 200, slice_stride = 100, num_slices = 5, transform=None):
         self.root_dir = root_dir
         self.transform = transform
         self.img_range = img_range
-        self.cur_sample = Img(None, None, 0, 0)
+        self.cur_sample = Img(None, None, None, 0, 0)
         self.cur_sample.complete = True
         self.img_num = img_range[0]
         self.len = 0
@@ -98,13 +100,13 @@ class SpleenDataset(Dataset):
         if self.cur_sample.slice_num == self.total_slices:
             self.cur_sample.idx += 1
             self.cur_sample.slice_num = 0
-            self.cur_sample.complete = self.cur_sample.idx == self.cur_sample.img.shape[0]
+            self.cur_sample.complete = (self.cur_sample.idx == self.cur_sample.img.shape[0])
 
         #calculate the "coords"
         x = self.cur_sample.slice_num % self.num_slices
         y = int((self.cur_sample.slice_num - x) / self.num_slices)
 
-        print("X: {}, Y: {}".format(x, y))
+        #print("X: {}, Y: {}".format(x, y))
 
         x = x * self.slice_stride
         y = y * self.slice_stride
@@ -115,7 +117,6 @@ class SpleenDataset(Dataset):
         prev_img_slice = self.cur_sample.img[max(self.cur_sample.idx - 1, 0), x:ex, y:ey].astype('float32')
         img_slice = self.cur_sample.img[self.cur_sample.idx, x:ex, y:ey].astype('float32')
         next_img_slice = self.cur_sample.img[min(self.cur_sample.idx + 1, self.cur_sample.img.shape[0] - 1), x:ex, y:ey].astype('float32')
-
         img_label = self.cur_sample.label[self.cur_sample.idx, x:ex, y:ey] if self.is_labeled else np.array([])
 
         #if we have an image label filter for the spleen
@@ -126,6 +127,19 @@ class SpleenDataset(Dataset):
 
         # move to the next slice
         self.cur_sample.slice_num += 1
+
+
+        if SAVE_IMAGES:
+            im = Image.fromarray(np.uint8(img_slice))
+            img_name = self.cur_sample.img_name
+            im.save('./gen/gen_' + str(img_name).zfill(4) + ".png")
+            im = Image.fromarray(np.uint8(prev_img_slice))
+            im.save('./gen/prev_gen_' + str(img_name).zfill(4) + ".png")
+            im = Image.fromarray(np.uint8(next_img_slice))
+            im.save('./gen/next_gen_' + str(img_name).zfill(4) + ".png")
+            im = Image.fromarray(np.uint8(img_label[0, :, :])*125)
+            im.save('./gen/mask_gen_' + str(img_name).zfill(4) + ".png")
+
 
         #update the current object's status
         return prev_img_slice, img_slice, next_img_slice, img_label
@@ -143,13 +157,11 @@ class SpleenDataset(Dataset):
             img_file = os.path.join(self.root_dir, TRAIN_DIR, IMG_PREFIX + self.files[self.img_num] + EXT)
             label_file = os.path.join(self.root_dir, LABEL_DIR, LABEL_PREFIX + self.files[self.img_num] + EXT) if self.is_labeled else None
 
-            self.cur_sample = Img(process_image(img_file, self.padding), process_image(label_file, self.padding, False), idx=0, slice_num=0) #img, label, axis, idx
+            self.cur_sample = Img(self.files[self.img_num], process_image(img_file, self.padding), process_image(label_file, self.padding, False), idx=0, slice_num=0) #img, label, axis, idx
 
         #get the next slice
         prev_img_slice, img_slice, next_img_slice, img_label = self.get_next_slices()
 
-        #im = Image.fromarray(np.uint8(img_slice))
-        #im.save('./gen/gen_' + str(idx).zfill(4) + ".png")
 
         # convert to tensors
         imgcs = torch.from_numpy(img_slice).unsqueeze(0)
