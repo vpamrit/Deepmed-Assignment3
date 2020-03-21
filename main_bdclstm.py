@@ -54,7 +54,7 @@ if args.cuda:
 DATA_FOLDER = args.data_folder
 
 # %% Loading in the Dataset
-dset_train = SpleenDataset(DATA_FOLDER, img_range=(0, 10))
+dset_train = SpleenDataset(DATA_FOLDER, img_range=(0, 1))
 dset_valid = SpleenDataset(DATA_FOLDER, img_range=(11, 15))
 
 train_loader = DataLoader(dset_train, batch_size=args.batch_size, num_workers=1)
@@ -116,7 +116,7 @@ def train(epoch):
     total_loss = 0
 
     for batch_idx, (image1, image2, image3, mask) in enumerate(valid_loader):
-        with torch.no_grad:
+        with torch.no_grad():
             image1, image2, image3, mask = image1.cuda(), \
                  image2.cuda(), \
                  image3.cuda(), \
