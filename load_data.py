@@ -107,7 +107,7 @@ class SpleenDataset(Dataset):
 
         #if we have an image label filter for the spleen
         if img_label.size != 0:
-            img_label = img_label == SPLEEN_VAL
+            img_label = np.stack((img_label == SPLEEN_VAL, img_label != SPLEEN_VAL), axis=0)
 
         img_label = img_label.astype('float32')
 
