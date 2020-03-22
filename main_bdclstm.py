@@ -19,7 +19,9 @@ from models import *
 
 # %% import transforms
 
+SAVE_VALID_IMAGES = True
 UNET_MODEL_FILE = 'unetsmall-100-10-0.001'
+COUNTER = 0
 
 # %% Training settings
 parser = argparse.ArgumentParser(description='UNet+BDCLSTM')
@@ -140,6 +142,15 @@ def train(epoch):
             total_loss += loss.item()
             dice_total += dice_loss(output[:, 1, :, :], mask[:, 1, :, :])
 
+            if SAVE_VALID_IMAGES:
+                for i in range(output.size()[0]):
+                    pil_img = torchvision.transforms.functional.to_pil_image(output[i, 1, :, :]*125).squeeze_())
+                    mask_img = torchvision.transforms.functional.to_pil_image(mask[i, 1, :, :]*125).squeeze_())
+
+                    pil_img.save('./gen/gen_img_' + str(COUNTER) + '.png')
+                    mask_img.save('./gen/mask_img_' + str(COUNTER) + '.png')
+                    COUNTER += 1
+
     print('Validation Epoch: Loss {}, Avg Loss {}\n'.format(total_loss, total_loss / len(valid_loader.dataset)))
     print('Dice Coeff Avg {}'.format(dice_total / len(valid_loader.dataset)))
 
@@ -189,10 +200,10 @@ if args.train:
         train(i)
         #test()
 
-    #torch.save(model.state_dict(),
-    #           'bdclstm-{}-{}-{}'.format(args.batch_size, args.epochs, args.lr))
-#else:
-#    model.load_state_dict(torch.load('bdclstm-{}-{}-{}'.format(args.batch_size, args.epochs,args.lr)))
-    #test()
-    #test(train_accuracy=True)
+    torch.save(model.state_dict(),
+               'bdclstm-{}-{}-{}'.format(args.batch_size, args.epochs, args.lr))
+else:
+    model.load_state_dict(torch.load('bdclstm-{}-{}-{}'.format(args.batch_size, args.epochs,args.lr)))
+    test()
+
 print("Complete")
