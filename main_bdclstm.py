@@ -4,6 +4,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import torch
 import torch.optim as optim
+import torchvision
 from plain_dice import dice_loss
 
 from losses import DICELossMultiClass, DICELoss
