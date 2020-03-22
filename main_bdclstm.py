@@ -140,7 +140,10 @@ def train(epoch):
 
             loss = criterion(output, mask)
             total_loss += loss.item()
-            dice_total += dice_loss(output[:, 1, :, :], mask[:, 1, :, :])
+
+            #force the output to 0 and 1
+            pure_output = (output.round() > 0).astype('float32')
+            dice_total += dice_loss(pure_output[:, 1, :, :], mask[:, 1, :, :])
 
             if SAVE_VALID_IMAGES:
                 for i in range(output.size()[0]):
