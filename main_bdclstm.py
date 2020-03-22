@@ -72,7 +72,7 @@ if args.cuda:
 
 # Setting Optimizer
 optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.mom)
-criterion = DICELoss()
+criterion = DICELossMultiClass()
 
 diceLoss  = DiceLosses.DiceLoss()
 # Define Training Loop
