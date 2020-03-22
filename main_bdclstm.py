@@ -144,8 +144,8 @@ def train(epoch):
 
             if SAVE_VALID_IMAGES:
                 for i in range(output.size()[0]):
-                    pil_img = torchvision.transforms.functional.to_pil_image(output[i, 1, :, :]*125).squeeze_())
-                    mask_img = torchvision.transforms.functional.to_pil_image(mask[i, 1, :, :]*125).squeeze_())
+                    pil_img = torchvision.transforms.functional.to_pil_image((output[i, 1, :, :]*125).squeeze_())
+                    mask_img = torchvision.transforms.functional.to_pil_image((mask[i, 1, :, :]*125).squeeze_())
 
                     pil_img.save('./gen/gen_img_' + str(COUNTER) + '.png')
                     mask_img.save('./gen/mask_img_' + str(COUNTER) + '.png')
