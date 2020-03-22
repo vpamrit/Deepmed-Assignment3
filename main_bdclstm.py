@@ -8,7 +8,7 @@ import torchvision
 from plain_dice import dice_loss
 
 from losses import DICELossMultiClass, DICELoss
-from seg_losses import TverskyLoss
+from seg_losses import DiceLoss
 from load_data import SpleenDataset
 from torch.autograd import Variable
 from torch.utils.data import DataLoader
@@ -77,9 +77,8 @@ if args.cuda:
 
 # Setting Optimizer
 optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.mom)
-criterion = DICELossMultiClass()
+criterion = DiceLoss()
 
-diceLoss  = DiceLosses.DiceLoss()
 # Define Training Loop
 
 
