@@ -143,7 +143,7 @@ def train(epoch):
             total_loss += loss.item()
 
             #force the output to 0 and 1
-            pure_output = (output.round() > 0).astype('float32')
+            pure_output = (output.round() > 0).float()
             dice_total += dice_loss(pure_output[:, 1, :, :], mask[:, 1, :, :])
 
             if SAVE_VALID_IMAGES:
