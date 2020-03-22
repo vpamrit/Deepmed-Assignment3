@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import torch
 import torch.optim as optim
 import torchvision
-from plain_dice import dice_loss
+from plain_dice import dice_coeff
 
 from losses import DICELossMultiClass, DICELoss
 from seg_losses import DiceLoss
@@ -142,8 +142,8 @@ def train(epoch, counter):
             total_loss += loss.item()
 
             #force the output to 0 and 1
-            pure_output = (output.round() > 0).float()
-            dice_total += dice_loss(pure_output[:, 1, :, :], mask[:, 1, :, :])
+            pure_output = (output[:,1,:,:].round() > 0).float()
+            dice_total += dice_coeff(pure_output, mask[:, 1, :, :])
 
             if SAVE_VALID_IMAGES and epoch in SAVE_EPOCHS:
                 for i in range(output.size()[0]):
