@@ -161,8 +161,10 @@ class SpleenDataset(Dataset):
             im.save('./gen/gen_' + str(img_name).zfill(4) + "_prev.png")
             im = Image.fromarray(np.uint8(next_img_slice))
             im.save('./gen/gen_' + str(img_name).zfill(4) + "_next.png")
-            im = Image.fromarray(np.uint8(img_label[0, :, :])*125)
-            im.save('./gen/gen_' + str(img_name).zfill(4) + "_mask.png")
+
+            for i in range(img_label.shape[0]):
+                im = Image.fromarray(np.uint8(img_label[i, :, :])*125)
+                im.save('./gen/gen_' + str(img_name).zfill(4) + "_mask_" + str(i) + ".png")
 
 
         #update the current object's status
