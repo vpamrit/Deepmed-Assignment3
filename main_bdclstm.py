@@ -67,7 +67,7 @@ train_loader = DataLoader(dset_train, batch_size=args.batch_size, num_workers=1)
 
 
 # %% Loading in the models
-unet = UNet(num_classes=(len(CLASSES) + 1))
+unet = UNetSmall(num_classes=(len(CLASSES) + 1))
 #unet.load_state_dict(torch.load(UNET_MODEL_FILE))
 model = BDCLSTM(input_channels=32, hidden_channels=[32], num_classes=(len(CLASSES) + 1))
 
