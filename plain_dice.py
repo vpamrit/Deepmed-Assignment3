@@ -6,7 +6,6 @@ class DiceCoeff():
     """Dice coeff for individual examples"""
 
     def forward(self, output, target):
-        self.save_for_backward(output, target)
         eps = 0.0001
         self.inter = torch.dot(output.view(-1), target.view(-1))
         self.union = torch.sum(output) + torch.sum(target) + eps
