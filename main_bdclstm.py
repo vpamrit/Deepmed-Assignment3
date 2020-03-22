@@ -4,10 +4,11 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import torch
 import torch.optim as optim
+from plain_dice import dice_loss
+
 from losses import DICELossMultiClass, DICELoss
 from seg_losses import TverskyLoss
 from load_data import SpleenDataset
-
 from torch.autograd import Variable
 from torch.utils.data import DataLoader
 import torchvision.transforms as tr
@@ -118,6 +119,7 @@ def train(epoch):
     model.eval()
 
     total_loss = 0
+    dice_total = 0
 
     print('Computing validation loss...')
 
@@ -136,8 +138,10 @@ def train(epoch):
 
             loss = criterion(output, mask)
             total_loss += loss.item()
+            dice_total += dice_loss(output[:, 1, :, :], mask[:, 1, :, :])
 
-    print('Validation Epoch: {} Loss, {} Avg Loss'.format(total_loss, total_loss / len(valid_loader.dataset)))
+    print('Validation Epoch: Loss {}, Avg Loss {}\n'.format(total_loss, total_loss / len(valid_loader.dataset)))
+    print('Dice Coeff Avg {}'.format(total_loss / len(valid_loader.dataset)))
 
     #calculate dice coefficient (on validation for the whole segmentations)
 
