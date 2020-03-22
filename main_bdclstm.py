@@ -100,7 +100,7 @@ def train(epoch):
 
         output = model(map1, map2, map3)
 
-        print("Mask size is {} Output size is {}".format(mask.size(), output.size()))
+        #print("Mask size is {} Output size is {}".format(mask.size(), output.size()))
         #need to ignore padding border here (for loss)
         padding = dset_train.padding
         loss = criterion(output, mask)

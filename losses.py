@@ -12,8 +12,8 @@ class DICELossMultiClass(nn.Module):
 
     def forward(self, output, real_mask):
         num_classes = output.size(1)
-        print(num_classes)
         dice_eso = 0
+
         for i in range(num_classes):
             probs = torch.squeeze(output[:, i, :, :], 1)
             mask = torch.squeeze(real_mask[:, i, :, :], 1)
