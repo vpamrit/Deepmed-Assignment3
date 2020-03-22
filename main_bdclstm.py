@@ -22,7 +22,6 @@ from models import *
 
 SAVE_VALID_IMAGES = True
 UNET_MODEL_FILE = 'unetsmall-100-10-0.001'
-COUNTER = 0
 
 # %% Training settings
 parser = argparse.ArgumentParser(description='UNet+BDCLSTM')
@@ -147,6 +146,7 @@ def train(epoch):
             dice_total += dice_loss(pure_output[:, 1, :, :], mask[:, 1, :, :])
 
             if SAVE_VALID_IMAGES:
+                COUNTER = 0
                 for i in range(output.size()[0]):
                     pil_img = torchvision.transforms.functional.to_pil_image((output[i, 1, :, :]*125).squeeze_().cpu())
                     mask_img = torchvision.transforms.functional.to_pil_image((mask[i, 1, :, :]*125).squeeze_().cpu())
