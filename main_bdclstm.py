@@ -133,7 +133,7 @@ def train(epoch):
 
     print('Validation Epoch: {} Loss, {} Avg Loss'.format(total_loss, total_loss / len(valid_loader.dataset)))
 
-    calculate dice coefficient (on validation for the whole segmentations)
+    #calculate dice coefficient (on validation for the whole segmentations)
 
 
 def test(train_accuracy=False):
