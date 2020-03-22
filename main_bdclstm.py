@@ -115,6 +115,8 @@ def train(epoch):
 
     total_loss = 0
 
+    print('Computing validation loss...')
+
     for batch_idx, (image1, image2, image3, mask) in enumerate(valid_loader):
         with torch.no_grad():
             image1, image2, image3, mask = image1.cuda(), \
