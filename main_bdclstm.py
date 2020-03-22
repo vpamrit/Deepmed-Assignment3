@@ -125,6 +125,8 @@ def train(epoch):
 
     print('Computing validation loss...')
 
+    COUNTER = 0
+
     for batch_idx, (image1, image2, image3, mask) in enumerate(valid_loader):
         with torch.no_grad():
             image1, image2, image3, mask = image1.cuda(), \
@@ -146,7 +148,6 @@ def train(epoch):
             dice_total += dice_loss(pure_output[:, 1, :, :], mask[:, 1, :, :])
 
             if SAVE_VALID_IMAGES:
-                COUNTER = 0
                 for i in range(output.size()[0]):
                     pil_img = torchvision.transforms.functional.to_pil_image((output[i, 1, :, :]*125).squeeze_().cpu())
                     mask_img = torchvision.transforms.functional.to_pil_image((mask[i, 1, :, :]*125).squeeze_().cpu())
