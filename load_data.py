@@ -57,7 +57,7 @@ class Img:
 
 
 class SpleenDataset(Dataset):
-    def __init__(self, root_dir, img_range=(0,0), slice_size = 240, slice_stride = 80, num_slices = 5, transform=None):
+    def __init__(self, root_dir, img_range=(0,0), slice_size = 240, slice_stride = 80, num_slices = 5, transform=None, classes=[1,2,3,4,5,6,7,8,9,10,11,12,13]):
         self.root_dir = root_dir
         self.transform = transform
         self.img_range = img_range
@@ -71,6 +71,7 @@ class SpleenDataset(Dataset):
         self.slice_stride = int(slice_stride)
         self.num_slices = int(num_slices)
         self.total_slices = num_slices * num_slices
+        self.classes = classes
 
 
         #compute the padding here
@@ -138,9 +139,14 @@ class SpleenDataset(Dataset):
 
         #if we have an image label filter for the spleen
         if img_label.size != 0:
-            img_label = np.stack((img_label == SPLEEN_VAL, img_label != SPLEEN_VAL), axis=0)
+            tmp_label = (img_label == 0)
 
-        img_label = img_label.astype('float32')
+            for nclass in self.classes:
+                tmp_label = np.stack((tmp_label, img_label == nclass), axis=0)
+
+            img_label = tmp_label
+
+        img_label = tmp_label.astype('float32')
 
         # move to the next slice
         self.cur_sample.slice_num += 1

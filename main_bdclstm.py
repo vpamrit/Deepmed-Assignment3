@@ -52,19 +52,20 @@ if args.cuda:
     print("We are on the GPU!")
 
 DATA_FOLDER = args.data_folder
+CLASSES = [1,2,3,4,5,6,7,8,9,10,11,12,13]
 
 # %% Loading in the Dataset
 slice_size = 240
-dset_train = SpleenDataset(DATA_FOLDER, (1, 1), slice_size, 80, 5)
-dset_valid = SpleenDataset(DATA_FOLDER, (0, 0), slice_size, 200, 3)
+dset_train = SpleenDataset(DATA_FOLDER, (1, 1), slice_size, 80, 5, classes=CLASSES)
+dset_valid = SpleenDataset(DATA_FOLDER, (0, 0), slice_size, 200, 3, classes=CLASSES)
 
 train_loader = DataLoader(dset_train, batch_size=args.batch_size, num_workers=1)
 
 
 # %% Loading in the models
-unet = UNetSmall(num_classes=2)
+unet = UNetSmall(num_classes=(len(CLASSES) + 1))
 #unet.load_state_dict(torch.load(UNET_MODEL_FILE))
-model = BDCLSTM(input_channels=32, hidden_channels=[32], num_classes=2)
+model = BDCLSTM(input_channels=32, hidden_channels=[32], num_classes=(len(CLASSES) + 1))
 
 if args.cuda:
     unet.cuda()
