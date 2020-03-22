@@ -80,8 +80,6 @@ optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.mom)
 criterion = DiceLoss()
 
 # Define Training Loop
-
-
 def train(epoch, counter):
     model.train()
     for batch_idx, (image1, image2, image3, mask) in enumerate(train_loader):
