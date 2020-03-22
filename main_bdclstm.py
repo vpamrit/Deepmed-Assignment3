@@ -54,8 +54,8 @@ if args.cuda:
 DATA_FOLDER = args.data_folder
 
 # %% Loading in the Dataset
-dset_train = SpleenDataset(DATA_FOLDER, img_range=(1, 1))
-dset_valid = SpleenDataset(DATA_FOLDER, img_range=(0, 0))
+dset_train = SpleenDataset(DATA_FOLDER, img_range=(1, 1), slice_size, 80, 5)
+dset_valid = SpleenDataset(DATA_FOLDER, img_range=(0, 0), slice_size, 200, 3)
 
 train_loader = DataLoader(dset_train, batch_size=args.batch_size, num_workers=1)
 
@@ -71,7 +71,7 @@ if args.cuda:
 
 # Setting Optimizer
 optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.mom)
-criterion = TverskyLoss() #DICELoss()
+criterion = DICELoss()
 
 diceLoss  = DiceLosses.DiceLoss()
 # Define Training Loop
@@ -100,6 +100,8 @@ def train(epoch):
         output = model(map1, map2, map3)
 
         #print("Mask size is {}".format(mask.size()))
+        #need to ignore padding border here (for loss)
+        padding = dset_train.padding
         loss = criterion(output, mask)
 
         loss.backward()
