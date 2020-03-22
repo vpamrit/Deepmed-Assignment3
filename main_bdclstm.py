@@ -22,6 +22,7 @@ from models import *
 
 SAVE_VALID_IMAGES = True
 UNET_MODEL_FILE = 'unetsmall-100-10-0.001'
+SAVE_EPOCHS = [5, 10, 15]
 
 # %% Training settings
 parser = argparse.ArgumentParser(description='UNet+BDCLSTM')
@@ -55,7 +56,7 @@ if args.cuda:
     print("We are on the GPU!")
 
 DATA_FOLDER = args.data_folder
-CLASSES = [1,2,3,4,5,6,7,8,9,10,11,12,13]
+CLASSES = [1,6,7,8,9,11]
 
 # %% Loading in the Dataset
 slice_size = 240
@@ -66,7 +67,7 @@ train_loader = DataLoader(dset_train, batch_size=args.batch_size, num_workers=1)
 
 
 # %% Loading in the models
-unet = UNetSmall(num_classes=(len(CLASSES) + 1))
+unet = UNet(num_classes=(len(CLASSES) + 1))
 #unet.load_state_dict(torch.load(UNET_MODEL_FILE))
 model = BDCLSTM(input_channels=32, hidden_channels=[32], num_classes=(len(CLASSES) + 1))
 
@@ -145,13 +146,13 @@ def train(epoch, counter):
             pure_output = (output.round() > 0).float()
             dice_total += dice_loss(pure_output[:, 1, :, :], mask[:, 1, :, :])
 
-            if SAVE_VALID_IMAGES:
+            if SAVE_VALID_IMAGES and epoch in SAVE_EPOCHS:
                 for i in range(output.size()[0]):
                     pil_img = torchvision.transforms.functional.to_pil_image((output[i, 1, :, :]*125).squeeze_().cpu())
                     mask_img = torchvision.transforms.functional.to_pil_image((mask[i, 1, :, :]*125).squeeze_().cpu())
 
-                    pil_img.save('./gen/gen_img_' + str(counter) + '.png')
-                    mask_img.save('./gen/mask_img_' + str(counter) + '.png')
+                    pil_img.save('./gen/' + str(epoch) + '/gen_img_' + str(counter) + '.png')
+                    mask_img.save('./gen/'+ str(epoch) + '/mask_img_' + str(counter) + '.png')
                     counter += 1
 
     print('Validation Epoch: Loss {}, Avg Loss {}\n'.format(total_loss, total_loss / len(valid_loader.dataset)))
