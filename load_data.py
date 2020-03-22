@@ -139,10 +139,10 @@ class SpleenDataset(Dataset):
 
         #if we have an image label filter for the spleen
         if img_label.size != 0:
-            tmp_label = (img_label == 0)
+            tmp_label = (img_label == 0).unsqueeze(0)
 
             for nclass in self.classes:
-                tmp_label = np.stack((tmp_label, img_label == nclass), axis=0)
+                tmp_label = np.concatenate((tmp_label, (img_label == nclass).unsqueeze(0)), axis=0)
 
             img_label = tmp_label
 
