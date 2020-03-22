@@ -82,7 +82,7 @@ diceLoss  = DiceLosses.DiceLoss()
 # Define Training Loop
 
 
-def train(epoch):
+def train(epoch, counter):
     model.train()
     for batch_idx, (image1, image2, image3, mask) in enumerate(train_loader):
         if args.cuda:
@@ -125,8 +125,6 @@ def train(epoch):
 
     print('Computing validation loss...')
 
-    COUNTER = 0
-
     for batch_idx, (image1, image2, image3, mask) in enumerate(valid_loader):
         with torch.no_grad():
             image1, image2, image3, mask = image1.cuda(), \
@@ -152,15 +150,14 @@ def train(epoch):
                     pil_img = torchvision.transforms.functional.to_pil_image((output[i, 1, :, :]*125).squeeze_().cpu())
                     mask_img = torchvision.transforms.functional.to_pil_image((mask[i, 1, :, :]*125).squeeze_().cpu())
 
-                    pil_img.save('./gen/gen_img_' + str(COUNTER) + '.png')
-                    mask_img.save('./gen/mask_img_' + str(COUNTER) + '.png')
-                    COUNTER += 1
+                    pil_img.save('./gen/gen_img_' + str(counter) + '.png')
+                    mask_img.save('./gen/mask_img_' + str(counter) + '.png')
+                    counter += 1
 
     print('Validation Epoch: Loss {}, Avg Loss {}\n'.format(total_loss, total_loss / len(valid_loader.dataset)))
     print('Dice Coeff Avg {}'.format(dice_total / len(valid_loader.dataset)))
 
-    #calculate dice coefficient (on validation for the whole segmentations)
-
+    return counter
 
 def test(train_accuracy=False):
     test_loss = 0
@@ -201,8 +198,9 @@ def test(train_accuracy=False):
 
 
 if args.train:
+    counter = 0
     for i in range(args.epochs):
-        train(i)
+        counter = train(i, counter)
         #test()
 
     torch.save(model.state_dict(),
