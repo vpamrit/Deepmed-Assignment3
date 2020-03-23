@@ -60,7 +60,7 @@ CLASSES = [1,6,7,8,9,11]
 # %% Loading in the Dataset
 slice_size = 240
 dset_train = SpleenDataset(DATA_FOLDER, (1, 1), slice_size, 80, 5, classes=CLASSES) #will this fail due to different size?
-dset_valid = SpleenDataset(DATA_FOLDER, (0, 0), slice_size, 200, 3, classes=CLASSES)
+dset_valid = SpleenDataset(DATA_FOLDER, (0, 0), slice_size, 160, 3, classes=CLASSES)
 
 train_loader = DataLoader(dset_train, batch_size=args.batch_size, num_workers=4)
 
