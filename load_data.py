@@ -91,7 +91,7 @@ class SpleenDataset(Dataset):
 
             sample = Img(self.files[self.img_num], process_image(img_file, self.padding, True), process_image(label_file, self.padding, False)) #img, label, axis, idx
             sample_len = sample.img.shape[0]
-            print(sample_len)
+            print("SAMPLE LEN {}".format(sample_len))
 
             # create a map of idx to sample | idx to slice_num
             self.len += sample_len * self.total_slices
