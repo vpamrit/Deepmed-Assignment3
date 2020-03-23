@@ -151,11 +151,7 @@ def train(epoch, counter):
             #turn off cuda here
 
             pure_output = (output[:,1,:,:].clone().detach().round() > 0).float()
-            print(pure_output)
-            pure_output.requires_grad(False)
-
             _3dmask = mask[:, 1, :, :].clone().detach()
-            _3dmask.requires_grad(False)
 
             #force to dim 5 N x C x H x W x D
             _3dmask = _3dmask.permute((1, 2, 0)).unsqueeze_(0).unsqueeze_(0)
