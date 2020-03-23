@@ -152,6 +152,7 @@ def train(epoch, counter):
 
             pure_output = output[:,1,:,:].clone().detach().round() > 0
             pure_output.float()
+            print(pure_output)
             pure_output.requires_grad(False)
 
             _3dmask = mask[:, 1, :, :].clone().detach()
