@@ -66,9 +66,9 @@ train_loader = DataLoader(dset_train, batch_size=args.batch_size, num_workers=4)
 
 
 # %% Loading in the models
-unet = UNetSmall(num_classes=(len(CLASSES) + 1))
+unet = UNet(num_classes=(len(CLASSES) + 1))
 #unet.load_state_dict(torch.load(UNET_MODEL_FILE))
-model = BDCLSTM(input_channels=32, hidden_channels=[32], num_classes=(len(CLASSES) + 1))
+model = BDCLSTM(input_channels=96, hidden_channels=[96], num_classes=(len(CLASSES) + 1))
 
 if args.cuda:
     unet.cuda()
