@@ -112,14 +112,14 @@ def train(epoch, loss_list, counter):
                 image3.cuda(), \
                 mask.cuda()
 
-        image1, image, image3, mask = Variable(image1), \
+        image1, image2, image3, mask = Variable(image1), \
             Variable(image2), \
             Variable(image3), \
             Variable(mask)
 
         optimizer.zero_grad()
 
-        output = model(image)
+        output = model(image2)
 
         #print("Mask size is {} Output size is {}".format(mask.size(), output.size()))
         #need to ignore padding border here (for loss)
@@ -152,13 +152,13 @@ def train(epoch, loss_list, counter):
     # N x C x H x W x D
     for batch_idx, (image1, image2, image3, mask) in enumerate(valid_loader):
         with torch.no_grad():
-            image1, image, image3, mask = image1.cuda(), \
+            image1, image2, image3, mask = image1.cuda(), \
                  image2.cuda(), \
                  image3.cuda(), \
                  mask.cuda()
 
 
-            output = model(image)
+            output = model(image2)
 
             loss = criterion(output, mask)
             total_loss += loss.item()
