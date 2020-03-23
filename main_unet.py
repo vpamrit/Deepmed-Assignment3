@@ -87,9 +87,7 @@ print("Validation Data :", len(valid_loader.dataset))
 
 # %% Loading in the model
 model = UNet()
-
-if args.cuda:
-    model.cuda()
+model.cuda()
 
 if args.optimizer == 'SGD':
     optimizer = optim.SGD(model.parameters(), lr=args.lr,
