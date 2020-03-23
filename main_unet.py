@@ -16,7 +16,9 @@ from torch.utils.data import DataLoader
 import scipy.io as sio
 import torchvision.transforms as tr
 from tqdm import tqdm
+from config import *
 import numpy as np
+import torchvision
 
 from plain_dice import dice_coeff
 
@@ -64,12 +66,6 @@ args = parser.parse_args()
 args.cuda = args.cuda and torch.cuda.is_available()
 
 DATA_FOLDER = args.data_folder
-
-SAVE_VALID_IMAGES = True
-SAVE_DIR = './saved_models/unet/'
-SAVE_EPOCHS = [0, 1, 2]
-DATA_FOLDER = args.data_folder
-CLASSES = [1,6,7,8,9,11]
 
 # %% Loading in the Dataset
 slice_size = 240

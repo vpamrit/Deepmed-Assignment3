@@ -13,6 +13,7 @@ from seg_losses import DiceLoss
 from load_data import SpleenDataset
 from torch.autograd import Variable
 from torch.utils.data import DataLoader
+from config import *
 import torchvision.transforms as tr
 
 from CLSTM import BDCLSTM
@@ -52,12 +53,8 @@ args.cuda = args.cuda and torch.cuda.is_available()
 if args.cuda:
     print("We are on the GPU!")
 
-SAVE_VALID_IMAGES = True
 UNET_MODEL_FILE = 'unetsmall-100-10-0.001'
-SAVE_DIR = './saved_models/lstm/'
-SAVE_EPOCHS = [5, 10, 15]
 DATA_FOLDER = args.data_folder
-CLASSES = [1,6,7,8,9,11]
 
 # %% Loading in the Dataset
 slice_size = 240
