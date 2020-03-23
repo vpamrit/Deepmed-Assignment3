@@ -47,14 +47,10 @@ def process_image(img_file, padding=0, normalize=True):
     return img
 
 class Img:
-    def __init__(self, img_name, img, label , idx, slice_num):
+    def __init__(self, img_name, img, label):
         self.img_name = img_name
         self.img = img
         self.label = label
-        self.idx = idx
-        self.slice_num = slice_num
-        self.complete = False
-
 
 class SpleenDataset(Dataset):
     def __init__(self, root_dir, img_range=(0,0), slice_size = 240, slice_stride = 80, num_slices = 5, transform=None, classes=[1,2,3,4,5,6,7,8,9,10,11,12,13]):
@@ -73,6 +69,7 @@ class SpleenDataset(Dataset):
         self.total_slices = num_slices * num_slices
         self.classes = classes
         self.samples = []
+        self.breakpoints = []
 
 
         #compute the padding here
@@ -93,48 +90,55 @@ class SpleenDataset(Dataset):
             img_file = os.path.join(self.root_dir, TRAIN_DIR, IMG_PREFIX + self.files[img_num] + EXT)
             label_file = os.path.join(self.root_dir, LABEL_DIR, LABEL_PREFIX + self.files[self.img_num] + EXT) if self.is_labeled else None
 
-            sample = (self.files[self.img_num], process_image(img_file, self.padding, True), process_image(label_file, self.padding, False)) #img, label, axis, idx
+            sample = Img(self.files[self.img_num], process_image(img_file, self.padding, True), process_image(label_file, self.padding, False)) #img, label, axis, idx
+            sample_len = sample[1].shape[0]
 
             # create a map of idx to sample | idx to slice_num
+            self.breakpoints.append(sample_len * self.total_slices)
+            self.len += sample_len
 
             print(img_file)
             self.samples.append(sample)
 
-        for sample in self.samples:
-            self.len += sample[1].shape[0]
+        #remove the last unnecessary element
+        del self.breakpoints[-1]
 
         print("Dataset details\n  Images: {}, 2D Slices: {}, Subslices {}, Padding-Margin: {}".format(self.last_img - self.first_img + 1, self.len, self.total_slices, self.padding))
+        print("Breakpoints: {}".format(self.breakpoints))
         self.img_num -= 1
 
+
+    # decodes an index to a subject's sample, a depth slice, and a 2D grid slice
+    def decode_idx(idx):
+        i = bisect(self.breakpoints, idx)
+
+        #zero means start indexing from 0
+        if i == 0:
+            lb = 0
+        else:
+            lb = self.breakpoints[i-1]
+
+        # return sample, slice_depth, slice_num
+        remainder = idx - lb #isolated the sample_num
+
+        subject = i
+        slice_num = remainder % self.total_slices
+        slice_depth = (remainder - slice_num) / self.samples[i].img.shape[0]
+
+        return subject, slice_depth, slice_num
+
+
     #return start of next slice for the current sample
-    def get_next_slices(self):
+    def get_next_slices(self, idx):
 
-        #check if the subslices are exhausted
-        if self.cur_sample.slice_num == self.total_slices:
-            self.cur_sample.idx += 1
-            self.cur_sample.slice_num = 0
-            self.cur_sample.complete = (self.cur_sample.idx == self.cur_sample.img.shape[0])
+        subject_num, slice_depth, slice_num = self.decode_idx(idx)
+        print("Subject_num {} slice depth {} slice_num {} idx {}".format(subject_num, slice_depth, slice_num, idx))
 
-        # if all slices of the current sample are exhausted (continue)
-        if self.cur_sample.complete:
-            self.img_num += 1
+        cur_sample = self.samples[subject_num]
 
-            #reset to the first image if at the end
-            if self.img_num == self.last_img + 1:
-                print("------------------- NEXT EPOCH -----------------------")
-                self.img_num = self.first_img
-
-            img_file = os.path.join(self.root_dir, TRAIN_DIR, IMG_PREFIX + self.files[self.img_num] + EXT)
-            label_file = os.path.join(self.root_dir, LABEL_DIR, LABEL_PREFIX + self.files[self.img_num] + EXT) if self.is_labeled else None
-
-            self.cur_sample = Img(self.files[self.img_num], process_image(img_file, self.padding), process_image(label_file, self.padding, False), idx=0, slice_num=0) #img, label, axis, idx
-
-
-        #calculate the "coords"
-        x = self.cur_sample.slice_num % self.num_slices
-        y = int((self.cur_sample.slice_num - x) / self.num_slices)
-
-        #print("X: {}, Y: {}".format(x, y))
+        #calculate the "coords" for the slice
+        x = slice_num % self.num_slices
+        y = int((slice_num - x) / self.num_slices)
 
         x = x * self.slice_stride
         y = y * self.slice_stride
@@ -142,10 +146,10 @@ class SpleenDataset(Dataset):
         ex = x + self.slice_size
         ey = y + self.slice_size
 
-        prev_img_slice = self.cur_sample.img[max(self.cur_sample.idx - 1, 0), x:ex, y:ey].astype('float32')
-        img_slice = self.cur_sample.img[self.cur_sample.idx, x:ex, y:ey].astype('float32')
-        next_img_slice = self.cur_sample.img[min(self.cur_sample.idx + 1, self.cur_sample.img.shape[0] - 1), x:ex, y:ey].astype('float32')
-        img_label = self.cur_sample.label[self.cur_sample.idx, x:ex, y:ey] if self.is_labeled else np.array([])
+        prev_img_slice = cur_sample.img[max(slice_depth - 1, 0), x:ex, y:ey].astype('float32')
+        img_slice = cur_sample.img[slice_depth, x:ex, y:ey].astype('float32')
+        next_img_slice = cur_sample.img[min(slice_depth + 1, cur_sample.img.shape[0] - 1), x:ex, y:ey].astype('float32')
+        img_label = cur_sample.label[slice_depth, x:ex, y:ey] if self.is_labeled else np.array([])
 
         #if we have an image label filter for the spleen
         if img_label.size != 0:
@@ -158,13 +162,10 @@ class SpleenDataset(Dataset):
 
         img_label = tmp_label.astype('float32')
 
-        # move to the next slice
-        self.cur_sample.slice_num += 1
-
 
         if SAVE_IMAGES:
             im = Image.fromarray(np.uint8(img_slice))
-            img_name = "{}_{}_{}".format(self.cur_sample.img_name, self.cur_sample.idx, self.cur_sample.slice_num - 1)
+            img_name = "{}_{}_{}".format(cur_sample.img_name, slice_depth, slice_num)
             print("SAVING {}".format(img_name))
             im.save('./gen/gen_' + str(img_name).zfill(4) + ".png")
             im = Image.fromarray(np.uint8(prev_img_slice))
@@ -190,7 +191,7 @@ class SpleenDataset(Dataset):
             idx = idx.tolist()
 
         #get the next slice
-        prev_img_slice, img_slice, next_img_slice, img_label = self.get_next_slices()
+        prev_img_slice, img_slice, next_img_slice, img_label = self.get_next_slices(idx)
 
         # convert to tensors
         imgcs = torch.from_numpy(img_slice).unsqueeze(0)
