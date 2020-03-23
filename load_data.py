@@ -85,7 +85,6 @@ class SpleenDataset(Dataset):
         self.files = sorted(self.files, key = lambda f : int(f))
 
         #compute the total number of frames
-        marker = 0
         for img_num in range(img_range[0], img_range[1]+1):
             img_file = os.path.join(self.root_dir, TRAIN_DIR, IMG_PREFIX + self.files[img_num] + EXT)
             label_file = os.path.join(self.root_dir, LABEL_DIR, LABEL_PREFIX + self.files[self.img_num] + EXT) if self.is_labeled else None
@@ -94,9 +93,8 @@ class SpleenDataset(Dataset):
             sample_len = sample.img.shape[0]
 
             # create a map of idx to sample | idx to slice_num
-            marker += sample_len * self.total_slices
-            self.breakpoints.append(marker)
-            self.len += sample_len
+            self.len += sample_len * self.total_slices
+            self.breakpoints.append(self.len)
 
             print(img_file)
             self.samples.append(sample)
@@ -183,7 +181,7 @@ class SpleenDataset(Dataset):
         return prev_img_slice, img_slice, next_img_slice, img_label
 
     def __len__(self):
-        return self.len * (self.num_slices * self.num_slices)
+        return self.len
 
     # TODO: this needs to work based on the index (that's how the iteration begins again!)
     # TODO: it can just reset to previous state
