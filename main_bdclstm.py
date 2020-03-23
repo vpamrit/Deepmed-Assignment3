@@ -143,6 +143,7 @@ def train(epoch, counter):
             dice_total += dice_coeff(pure_output, mask[:, 1, :, :])
 
             if SAVE_VALID_IMAGES and epoch in SAVE_EPOCHS:
+                print("SAVING IMAGES")
                 for i in range(output.size()[0]):
                     pil_img = torchvision.transforms.functional.to_pil_image((output[i, 1, :, :]*125).squeeze_().cpu())
                     mask_img = torchvision.transforms.functional.to_pil_image((mask[i, 1, :, :]*125).squeeze_().cpu())
