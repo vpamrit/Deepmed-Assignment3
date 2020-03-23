@@ -61,7 +61,7 @@ class SpleenDataset(Dataset):
         self.root_dir = root_dir
         self.transform = transform
         self.img_range = img_range
-        self.cur_samples = Img(None, None, None, 0, 0)
+        self.cur_sample = Img(None, None, None, 0, 0)
         self.cur_sample.complete = True
         self.img_num = img_range[0]
         self.first_img = img_range[0]
