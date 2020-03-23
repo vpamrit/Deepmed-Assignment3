@@ -91,6 +91,7 @@ class SpleenDataset(Dataset):
 
             sample = Img(self.files[self.img_num], process_image(img_file, self.padding, True), process_image(label_file, self.padding, False)) #img, label, axis, idx
             sample_len = sample.img.shape[0]
+            print(sample_len)
 
             # create a map of idx to sample | idx to slice_num
             self.len += sample_len * self.total_slices
@@ -104,7 +105,7 @@ class SpleenDataset(Dataset):
 
         print("Dataset details\n  Images: {}, 2D Slices: {}, Subslices {}, Padding-Margin: {}".format(self.last_img - self.first_img + 1, self.len, self.total_slices, self.padding))
         print("Breakpoints: {}".format(self.breakpoints))
-        self.img_num -= 1
+        print(self.len)
 
 
     # decodes an index to a subject's sample, a depth slice, and a 2D grid slice
