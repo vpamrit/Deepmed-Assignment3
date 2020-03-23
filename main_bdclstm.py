@@ -62,7 +62,7 @@ slice_size = 240
 dset_train = SpleenDataset(DATA_FOLDER, (1, 2), slice_size, 80, 5, classes=CLASSES) #will this fail due to different size?
 dset_valid = SpleenDataset(DATA_FOLDER, (0, 0), slice_size, 200, 3, classes=CLASSES)
 
-train_loader = DataLoader(dset_train, batch_size=args.batch_size, num_workers=1)
+train_loader = DataLoader(dset_train, batch_size=args.batch_size, num_workers=4)
 
 
 # %% Loading in the models
@@ -114,7 +114,7 @@ def train(epoch, counter):
                 100. * batch_idx / len(train_loader), loss.item()))
 
     #here we can compute the average dice coefficient on the remaining dataset
-    valid_loader = DataLoader(dset_valid, batch_size=1, num_workers=1)
+    valid_loader = DataLoader(dset_valid, batch_size=1, num_workers=4)
     model.eval()
 
     total_loss = 0
