@@ -3,7 +3,7 @@ import random
 import re
 import torch
 import torchvision
-#import nibabel as nib
+import nibabel as nib
 
 from skimage import io, transform
 from bisect import bisect
