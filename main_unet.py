@@ -71,7 +71,7 @@ DATA_FOLDER = args.data_folder
 slice_size = 240
 
 # %% Loading in the Dataset
-dset_train = SpleenDataset(DATA_FOLDER, (1, 1), slice_size, 80, 5, classes=CLASSES) #will this fail     due to different size?
+dset_train = SpleenDataset(DATA_FOLDER, (1, 15), slice_size, 80, 5, classes=CLASSES) #will this fail     due to different size?
 dset_valid = SpleenDataset(DATA_FOLDER, (0, 0), slice_size, 160, 3, classes=CLASSES)
 
 train_loader = DataLoader(dset_train, batch_size=args.batch_size, num_workers=4)
@@ -188,9 +188,9 @@ def train(epoch, loss_list, counter):
                     mask_img.save('./gen/mask_img_' + str(counter) + '.png')
                     counter += 1
 
-        print('Validation Epoch: Loss {}, Avg Loss {}\n'.format(total_loss, total_loss / len(valid_loader.  dataset)))
-        print('Dice Coeff Avg {}'.format(dice_total / (max(1, count)))) #divide by num batches
-        print('Full 3D Dice Result {}'.format(dice_coeff(full_mask, full_out)))
+    print('Validation Epoch: Loss {}, Avg Loss {}\n'.format(total_loss, total_loss / len(valid_loader.  dataset)))
+    print('Dice Coeff Avg {}'.format(dice_total / (max(1, count)))) #divide by num batches
+    print('Full 3D Dice Result {}'.format(dice_coeff(full_mask, full_out)))
 
 
 
