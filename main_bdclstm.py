@@ -162,7 +162,7 @@ def train(epoch, counter):
                 full_out = _3doutput
             else:
                 full_mask = torch.cat((full_mask, _3dmask), 4)
-                full_out = torch.cat((full_out, 3dout), 4)
+                full_out = torch.cat((full_out, _3doutput), 4)
 
 
             #lame way to calculate the dice
