@@ -129,7 +129,7 @@ def train(epoch, loss_list, counter):
 
         if batch_idx % args.log_interval == 0:
              print('Train Epoch: {} [{}/{} ({:.0f}%)]\tAverage DICE Loss: {:.6f}'.format(
-                 epoch, batch_idx * len(image), len(train_loader.dataset),
+                 epoch, batch_idx * len(image2), len(train_loader.dataset),
                  100. * batch_idx / len(train_loader), loss.item()))
 
 
