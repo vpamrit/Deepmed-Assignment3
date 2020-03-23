@@ -150,7 +150,9 @@ def train(epoch, counter):
             #construct full 3D tensor for dice calculation
             #turn off cuda here
 
-            pure_output = (output[:,1,:,:].clone().detach().requires_grad(False).round() > 0).float()
+            pure_output = output[:,1,:,:].clone().detach().requires_grad(False).round() > 0
+            pure_output.float()
+
             _3dmask = mask[:, 1, :, :].clone().detach().requires_grad(False)
 
             #force to dim 5 N x C x H x W x D
