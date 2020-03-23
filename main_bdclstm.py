@@ -147,11 +147,13 @@ def train(epoch, counter):
             total_loss += loss.item()
 
             #force the output to 0 and 1
-            pure_output = (output[:,1,:,:].clone().detach().requires_grad(False).round() > 0).float()
-
             #construct full 3D tensor for dice calculation
             #turn off cuda here
+
+            pure_output = (output[:,1,:,:].clone().detach().requires_grad(False).round() > 0).float()
             3dmask = mask[:, 1, :, :].clone().detach().requires_grad(False)
+
+            #force to dim 5 N x C x H x W x D
             3dmask = 3dmask.permute((1, 2, 0)).unsqueeze_(0).unsqueeze_(0)
             3doutput = pure_output.permute((1, 2, 0)).unsqueeze_(0).unsqueeze_(0)
 
