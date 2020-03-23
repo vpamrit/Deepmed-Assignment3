@@ -151,17 +151,17 @@ def train(epoch, counter):
             #turn off cuda here
 
             pure_output = (output[:,1,:,:].clone().detach().requires_grad(False).round() > 0).float()
-            3dmask = mask[:, 1, :, :].clone().detach().requires_grad(False)
+            _3dmask = mask[:, 1, :, :].clone().detach().requires_grad(False)
 
             #force to dim 5 N x C x H x W x D
-            3dmask = 3dmask.permute((1, 2, 0)).unsqueeze_(0).unsqueeze_(0)
-            3doutput = pure_output.permute((1, 2, 0)).unsqueeze_(0).unsqueeze_(0)
+            _3dmask = _3dmask.permute((1, 2, 0)).unsqueeze_(0).unsqueeze_(0)
+            _3doutput = pure_output.permute((1, 2, 0)).unsqueeze_(0).unsqueeze_(0)
 
             if full_mask.size()[0] == 0:
-                full_mask = 3dmask
-                full_out = 3doutput
+                full_mask = _3dmask
+                full_out = _3doutput
             else:
-                full_mask = torch.cat((full_mask, 3dmask), 4)
+                full_mask = torch.cat((full_mask, _3dmask), 4)
                 full_out = torch.cat((full_out, 3dout), 4)
 
 
