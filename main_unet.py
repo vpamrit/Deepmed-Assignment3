@@ -103,7 +103,7 @@ if args.optimizer == 'ADAM':
 criterion = DiceLoss()
 
 
-def train(epoch, loss_lsit):
+def train(epoch, loss_list, counter):
     model.train()
     for batch_idx, (image1, image2, image3, mask) in enumerate(train_loader):
         if args.cuda:
