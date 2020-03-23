@@ -59,14 +59,14 @@ CLASSES = [1,6,7,8,9,11]
 
 # %% Loading in the Dataset
 slice_size = 240
-dset_train = SpleenDataset(DATA_FOLDER, (1, 20), slice_size, 80, 5, classes=CLASSES) #will this fail due to different size?
+dset_train = SpleenDataset(DATA_FOLDER, (1, 1), slice_size, 80, 5, classes=CLASSES) #will this fail due to different size?
 dset_valid = SpleenDataset(DATA_FOLDER, (0, 0), slice_size, 160, 3, classes=CLASSES)
 
 train_loader = DataLoader(dset_train, batch_size=args.batch_size, num_workers=4)
 
 
 # %% Loading in the models
-unet = UNet(num_classes=(len(CLASSES) + 1))
+unet = UNetSmall(num_classes=(len(CLASSES) + 1))
 #unet.load_state_dict(torch.load(UNET_MODEL_FILE))
 model = BDCLSTM(input_channels=96, hidden_channels=[96], num_classes=(len(CLASSES) + 1))
 
@@ -98,6 +98,8 @@ def train(epoch, counter):
         map1 = unet(image1, return_features=True)
         map2 = unet(image2, return_features=True)
         map3 = unet(image3, return_features=True)
+
+        print(map1.size())
 
         output = model(map1, map2, map3)
 
