@@ -90,8 +90,9 @@ class SpleenDataset(Dataset):
             label_file = os.path.join(self.root_dir, LABEL_DIR, LABEL_PREFIX + self.files[self.img_num] + EXT) if self.is_labeled else None
 
             sample = Img(self.files[self.img_num], process_image(img_file, self.padding, True), process_image(label_file, self.padding, False)) #img, label, axis, idx
+
             sample_len = sample.img.shape[0]
-            print("SAMPLE LEN {}".format(sample_len))
+            print("SAMPLE LEN {}".format(sample.img.shape))
 
             # create a map of idx to sample | idx to slice_num
             self.len += sample_len * self.total_slices
@@ -99,6 +100,9 @@ class SpleenDataset(Dataset):
 
             print(img_file)
             self.samples.append(sample)
+
+        for sample in self.samples:
+            print("SAMPLE SIZE {}".format(sample.img.shape))
 
         #remove the last unnecessary element
         del self.breakpoints[-1]
