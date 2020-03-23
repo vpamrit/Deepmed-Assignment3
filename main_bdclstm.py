@@ -21,7 +21,7 @@ from models import *
 
 SAVE_VALID_IMAGES = True
 UNET_MODEL_FILE = 'unetsmall-100-10-0.001'
-SAVE_EPOCHS = [0, 1, 2]
+SAVE_EPOCHS = [5, 10, 15]
 
 # %% Training settings
 parser = argparse.ArgumentParser(description='UNet+BDCLSTM')
@@ -148,8 +148,8 @@ def train(epoch, counter):
                     pil_img = torchvision.transforms.functional.to_pil_image((output[i, 1, :, :]*125).squeeze_().cpu())
                     mask_img = torchvision.transforms.functional.to_pil_image((mask[i, 1, :, :]*125).squeeze_().cpu())
 
-                    pil_img.save('./gen/' + str(epoch) + '/gen_img_' + str(counter) + '.png')
-                    mask_img.save('./gen/'+ str(epoch) + '/mask_img_' + str(counter) + '.png')
+                    pil_img.save('./gen/gen_img_' + str(counter) + '.png')
+                    mask_img.save('./gen/mask_img_' + str(counter) + '.png')
                     counter += 1
 
     print('Validation Epoch: Loss {}, Avg Loss {}\n'.format(total_loss, total_loss / len(valid_loader.dataset)))
