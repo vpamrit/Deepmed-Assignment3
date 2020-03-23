@@ -189,7 +189,7 @@ def train(epoch, loss_list, counter):
                     counter += 1
 
         print('Validation Epoch: Loss {}, Avg Loss {}\n'.format(total_loss, total_loss / len(valid_loader.  dataset)))
-        print('Dice Coeff Avg {}'.format(dice_total / (max(1 , count))) #divide by num batches
+        print('Dice Coeff Avg {}'.format(dice_total / (max(1, count)))) #divide by num batches
         print('Full 3D Dice Result {}'.format(dice_coeff(full_mask, full_out)))
 
 
