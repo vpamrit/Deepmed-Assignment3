@@ -85,7 +85,7 @@ valid_loader = DataLoader(dset_valid, batch_size=args.batch_size, num_workers=4)
 
 
 print("Training Data : ", len(train_loader.dataset))
-print("Test Data :", len(test_loader.dataset))
+print("Validation Data :", len(valid_loader.dataset))
 
 # %% Loading in the model
 model = UNet()
