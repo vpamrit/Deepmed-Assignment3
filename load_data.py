@@ -58,7 +58,6 @@ class SpleenDataset(Dataset):
         self.root_dir = root_dir
         self.transform = transform
         self.img_range = img_range
-        self.img_num = img_range[0]
         self.first_img = img_range[0]
         self.last_img = img_range[1]
         self.len = 0
@@ -87,12 +86,11 @@ class SpleenDataset(Dataset):
         #compute the total number of frames
         for img_num in range(img_range[0], img_range[1]+1):
             img_file = os.path.join(self.root_dir, TRAIN_DIR, IMG_PREFIX + self.files[img_num] + EXT)
-            label_file = os.path.join(self.root_dir, LABEL_DIR, LABEL_PREFIX + self.files[self.img_num] + EXT) if self.is_labeled else None
+            label_file = os.path.join(self.root_dir, LABEL_DIR, LABEL_PREFIX + self.files[img_num] + EXT) if self.is_labeled else None
 
-            sample = Img(self.files[self.img_num], process_image(img_file, self.padding, True), process_image(label_file, self.padding, False)) #img, label, axis, idx
+            sample = Img(self.files[img_num], process_image(img_file, self.padding, True), process_image(label_file, self.padding, False)) #img, label, axis, idx
 
             sample_len = sample.img.shape[0]
-            print("SAMPLE LEN {}".format(sample.img.shape))
 
             # create a map of idx to sample | idx to slice_num
             self.len += sample_len * self.total_slices
@@ -100,9 +98,6 @@ class SpleenDataset(Dataset):
 
             print(img_file)
             self.samples.append(sample)
-
-        for sample in self.samples:
-            print("SAMPLE SIZE {}".format(sample.img.shape))
 
         #remove the last unnecessary element
         del self.breakpoints[-1]
@@ -136,7 +131,7 @@ class SpleenDataset(Dataset):
     def get_next_slices(self, idx):
 
         subject_num, slice_depth, slice_num = self.decode_idx(idx)
-        print("Subject_num {} slice depth {} slice_num {} idx {}".format(subject_num, slice_depth, slice_num, idx))
+        #print("Subject_num {} slice depth {} slice_num {} idx {}".format(subject_num, slice_depth, slice_num, idx))
 
         cur_sample = self.samples[subject_num]
 
