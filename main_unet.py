@@ -1,15 +1,12 @@
 
 # %% -*- coding: utf-8 -*-
-'''
-Author: Shreyas Padhy
-Driver file for Standard UNet Implementation
-'''
 from __future__ import print_function
 
 import argparse
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import os
 
 import torch
 import torch.nn as nn
