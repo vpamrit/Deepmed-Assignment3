@@ -199,9 +199,9 @@ def train(epoch, loss_lsit):
                     mask_img.save('./gen/mask_img_' + str(counter) + '.png')
                     counter += 1
 
-         print('Validation Epoch: Loss {}, Avg Loss {}\n'.format(total_loss, total_loss / len(valid_loader.  dataset)))
-         print('Dice Coeff Avg {}'.format(dice_total / count)) #divide by num batches
-         print('Full 3D Dice Result {}'.format(dice_coeff(full_mask, full_out)))
+        print('Validation Epoch: Loss {}, Avg Loss {}\n'.format(total_loss, total_loss / len(valid_loader.  dataset)))
+        print('Dice Coeff Avg {}'.format(dice_total / count)) #divide by num batches
+        print('Full 3D Dice Result {}'.format(dice_coeff(full_mask, full_out)))
 
 
 
