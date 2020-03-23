@@ -84,15 +84,17 @@ class SpleenDataset(Dataset):
         self.files = sorted(self.files, key = lambda f : int(f))
 
         #compute the total number of frames
+        marker = 0
         for img_num in range(img_range[0], img_range[1]+1):
             img_file = os.path.join(self.root_dir, TRAIN_DIR, IMG_PREFIX + self.files[img_num] + EXT)
             label_file = os.path.join(self.root_dir, LABEL_DIR, LABEL_PREFIX + self.files[self.img_num] + EXT) if self.is_labeled else None
 
             sample = Img(self.files[self.img_num], process_image(img_file, self.padding, True), process_image(label_file, self.padding, False)) #img, label, axis, idx
-            sample_len = sample[1].shape[0]
+            sample_len = sample.img.shape[0]
 
             # create a map of idx to sample | idx to slice_num
-            self.breakpoints.append(sample_len * self.total_slices)
+            marker += sample_len * self.total_slices
+            self.breakpoints.append(marker)
             self.len += sample_len
 
             print(img_file)
@@ -107,7 +109,7 @@ class SpleenDataset(Dataset):
 
 
     # decodes an index to a subject's sample, a depth slice, and a 2D grid slice
-    def decode_idx(idx):
+    def decode_idx(self, idx):
         i = bisect(self.breakpoints, idx)
 
         #zero means start indexing from 0
