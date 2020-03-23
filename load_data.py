@@ -93,9 +93,9 @@ class SpleenDataset(Dataset):
             img_file = os.path.join(self.root_dir, TRAIN_DIR, IMG_PREFIX + self.files[img_num] + EXT)
             label_file = os.path.join(self.root_dir, LABEL_DIR, LABEL_PREFIX + self.files[self.img_num] + EXT) if self.is_labeled else None
 
-            sample = (self.files[self.img_num], process_image(img_file, self.padding), process_image(label_file, self.padding, False)) #img, label, axis, idx
+            sample = (self.files[self.img_num], process_image(img_file, self.padding, True), process_image(label_file, self.padding, False)) #img, label, axis, idx
 
-            #create a map of idx to sample | idx to slice_num
+            # create a map of idx to sample | idx to slice_num
 
             print(img_file)
             self.samples.append(sample)
