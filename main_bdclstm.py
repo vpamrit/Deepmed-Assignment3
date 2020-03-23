@@ -153,7 +153,7 @@ def train(epoch, counter):
                     counter += 1
 
     print('Validation Epoch: Loss {}, Avg Loss {}\n'.format(total_loss, total_loss / len(valid_loader.dataset)))
-    print('Dice Coeff Avg {}'.format(dice_total / len(valid_loader.dataset)))
+    print('Dice Coeff Avg {}'.format(dice_total / len(valid_loader))) #divide by num batches
 
     return counter
 

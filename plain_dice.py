@@ -23,4 +23,4 @@ def dice_coeff(output, target):
     for i, c in enumerate(zip(output, target)):
         s = s + DiceCoeff().forward(c[0], c[1])
 
-    return s #/ (i + 1)
+    return s / (i + 1)
