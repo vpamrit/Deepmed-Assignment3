@@ -86,7 +86,7 @@ print("Training Data : ", len(train_loader.dataset))
 print("Validation Data :", len(valid_loader.dataset))
 
 # %% Loading in the model
-model = UNet()
+model = UNet(num_classes=len(CLASSES)+1)
 model.cuda()
 
 if args.optimizer == 'SGD':
