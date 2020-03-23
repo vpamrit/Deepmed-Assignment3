@@ -126,7 +126,7 @@ class SpleenDataset(Dataset):
         slice_num = remainder % self.total_slices
         slice_depth = (remainder - slice_num) / self.samples[i].img.shape[0]
 
-        return subject, slice_depth, slice_num
+        return subject, int(slice_depth), int(slice_num)
 
 
     #return start of next slice for the current sample
