@@ -71,8 +71,8 @@ unet = UNetSmall(num_classes=(len(CLASSES) + 1))
 model = BDCLSTM(input_channels=32, hidden_channels=[32], num_classes=(len(CLASSES) + 1))
 
 if args.cuda:
-    unet.cuda()
-    model.cuda()
+    unet.cuda().half()
+    model.cuda().half()
 
 # Setting Optimizer
 optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.mom)
@@ -83,10 +83,10 @@ def train(epoch, counter):
     model.train()
     for batch_idx, (image1, image2, image3, mask) in enumerate(train_loader):
         if args.cuda:
-            image1, image2, image3, mask = image1.cuda(), \
-                image2.cuda(), \
-                image3.cuda(), \
-                mask.cuda()
+            image1, image2, image3, mask = image1.cuda().half(), \
+                image2.cuda().half(), \
+                image3.cuda().half(), \
+                mask.cuda().half()
 
         image1, image2, image3, mask = Variable(image1), \
             Variable(image2), \
