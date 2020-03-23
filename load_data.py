@@ -101,7 +101,7 @@ class SpleenDataset(Dataset):
             self.samples.append(sample)
 
         for sample in self.samples:
-            self.len += sample[0].shape[0]
+            self.len += sample[1].shape[0]
 
         print("Dataset details\n  Images: {}, 2D Slices: {}, Subslices {}, Padding-Margin: {}".format(self.last_img - self.first_img + 1, self.len, self.total_slices, self.padding))
         self.img_num -= 1
