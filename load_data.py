@@ -133,7 +133,7 @@ class SpleenDataset(Dataset):
     def get_next_slices(self, idx):
 
         subject_num, slice_depth, slice_num = self.decode_idx(idx)
-        #print("Subject_num {} slice depth {} slice_num {} idx {}".format(subject_num, slice_depth, slice_num, idx))
+        print("Subject_num {} slice depth {} slice_num {} idx {}".format(subject_num, slice_depth, slice_num, idx))
 
         cur_sample = self.samples[subject_num]
 
