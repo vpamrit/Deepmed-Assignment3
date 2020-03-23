@@ -150,8 +150,7 @@ def train(epoch, counter):
             #construct full 3D tensor for dice calculation
             #turn off cuda here
 
-            pure_output = output[:,1,:,:].clone().detach().round() > 0
-            pure_output.float()
+            pure_output = (output[:,1,:,:].clone().detach().round() > 0).float()
             print(pure_output)
             pure_output.requires_grad(False)
 
