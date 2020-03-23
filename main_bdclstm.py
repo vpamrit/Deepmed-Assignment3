@@ -21,7 +21,7 @@ from models import *
 
 SAVE_VALID_IMAGES = True
 UNET_MODEL_FILE = 'unetsmall-100-10-0.001'
-SAVE_EPOCHS = [5, 10, 15]
+SAVE_EPOCHS = [0, 1, 2]
 
 # %% Training settings
 parser = argparse.ArgumentParser(description='UNet+BDCLSTM')
