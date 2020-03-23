@@ -81,38 +81,38 @@ criterion = DiceLoss()
 # Define Training Loop
 def train(epoch, counter):
     model.train()
-    for batch_idx, (image1, image2, image3, mask) in enumerate(train_loader):
-        if args.cuda:
-            image1, image2, image3, mask = image1.cuda(), \
-                image2.cuda(), \
-                image3.cuda(), \
-                mask.cuda()
-
-        image1, image2, image3, mask = Variable(image1), \
-            Variable(image2), \
-            Variable(image3), \
-            Variable(mask)
-
-        optimizer.zero_grad()
-
-        map1 = unet(image1, return_features=True)
-        map2 = unet(image2, return_features=True)
-        map3 = unet(image3, return_features=True)
-
-        output = model(map1, map2, map3)
-
-        #print("Mask size is {} Output size is {}".format(mask.size(), output.size()))
-        #need to ignore padding border here (for loss)
-        padding = dset_train.padding
-        loss = criterion(output, mask)
-
-        loss.backward()
-        optimizer.step()
-        if batch_idx % args.log_interval == 0:
-            print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                epoch, batch_idx * len(image1), len(train_loader.dataset),
-                100. * batch_idx / len(train_loader), loss.item()))
-
+#    for batch_idx, (image1, image2, image3, mask) in enumerate(train_loader):
+#        if args.cuda:
+#            image1, image2, image3, mask = image1.cuda(), \
+#                image2.cuda(), \
+#                image3.cuda(), \
+#                mask.cuda()
+#
+#        image1, image2, image3, mask = Variable(image1), \
+#            Variable(image2), \
+#            Variable(image3), \
+#            Variable(mask)
+#
+#        optimizer.zero_grad()
+#
+#        map1 = unet(image1, return_features=True)
+#        map2 = unet(image2, return_features=True)
+#        map3 = unet(image3, return_features=True)
+#
+#        output = model(map1, map2, map3)
+#
+#        #print("Mask size is {} Output size is {}".format(mask.size(), output.size()))
+#        #need to ignore padding border here (for loss)
+#        padding = dset_train.padding
+#        loss = criterion(output, mask)
+#
+#        loss.backward()
+#        optimizer.step()
+#        if batch_idx % args.log_interval == 0:
+#            print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+#                epoch, batch_idx * len(image1), len(train_loader.dataset),
+#                100. * batch_idx / len(train_loader), loss.item()))
+#
     #here we can compute the average dice coefficient on the remaining dataset
     valid_loader = DataLoader(dset_valid, batch_size=1, num_workers=4)
     model.eval()
