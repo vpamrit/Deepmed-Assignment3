@@ -151,7 +151,8 @@ def train(epoch, counter):
 
             #construct full 3D tensor for dice calculation
             #turn off cuda here
-            3dmask = mask[:, 1, :, :].clone().detach().requires_grad(False).permute((1, 2, 0)).unsqueeze_(0).unsqueeze_(0)
+            3dmask = mask[:, 1, :, :].clone().detach().requires_grad(False)
+            3dmask = 3dmask.permute((1, 2, 0)).unsqueeze_(0).unsqueeze_(0)
             3doutput = pure_output.permute((1, 2, 0)).unsqueeze_(0).unsqueeze_(0)
 
             if full_mask.size()[0] == 0:
