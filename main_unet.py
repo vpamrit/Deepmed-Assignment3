@@ -105,7 +105,7 @@ def train(epoch, loss_list, counter):
     model.train()
     for batch_idx, (image1, image2, image3, mask) in enumerate(train_loader):
         if args.cuda:
-            image1, image, image3, mask = image1.cuda(), \
+            image1, image2, image3, mask = image1.cuda(), \
                 image2.cuda(), \
                 image3.cuda(), \
                 mask.cuda()
@@ -150,10 +150,7 @@ def train(epoch, loss_list, counter):
     # N x C x H x W x D
     for batch_idx, (image1, image2, image3, mask) in enumerate(valid_loader):
         with torch.no_grad():
-            image1, image2, image3, mask = image1.cuda(), \
-                 image2.cuda(), \
-                 image3.cuda(), \
-                 mask.cuda()
+            image1, image2, image3, mask = image1.cuda(), image2.cuda(), image3.cuda(), mask.cuda()
 
 
             output = model(image2)
