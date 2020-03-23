@@ -124,7 +124,12 @@ def train(epoch, counter):
     print('Computing validation loss...')
 
 
+    #for assembling 3d for dice
+    full_mask = torch.Tensor()
+    full_out = torch.Tensor()
 
+    # N x C x H x W
+    # N x C x H x W x D
     for batch_idx, (image1, image2, image3, mask) in enumerate(valid_loader):
         with torch.no_grad():
             image1, image2, image3, mask = image1.cuda(), \
@@ -142,7 +147,22 @@ def train(epoch, counter):
             total_loss += loss.item()
 
             #force the output to 0 and 1
-            pure_output = (output[:,1,:,:].round() > 0).float()
+            pure_output = (output[:,1,:,:].clone().detach().requires_grad(False).round() > 0).float()
+
+            #construct full 3D tensor for dice calculation
+            #turn off cuda here
+            3dmask = mask[:, 1, :, :].clone().detach().requires_grad(False).permute((1, 2, 0)).unsqueeze_(0).unsqueeze_(0)
+            3doutput = pure_output.permute((1, 2, 0)).unsqueeze_(0).unsqueeze_(0)
+
+            if full_mask.size()[0] == 0:
+                full_mask = 3dmask
+                full_out = 3doutput
+            else:
+                full_mask = torch.cat((full_mask, 3dmask), 4)
+                full_out = torch.cat((full_out, 3dout), 4)
+
+
+            #lame way to calculate the dice
             dice_v = dice_coeff(pure_output, mask[:, 1, :, :])
             dice_total += dice_v if dice_v < 0.9 else 0
             count += 1 if dice_v < 0.9 else 0
@@ -159,6 +179,7 @@ def train(epoch, counter):
 
     print('Validation Epoch: Loss {}, Avg Loss {}\n'.format(total_loss, total_loss / len(valid_loader.dataset)))
     print('Dice Coeff Avg {}'.format(dice_total / count)) #divide by num batches
+    print('Full 3D Dice Result {}'.format(dice_coeff(full_mask, full_out)))
 
     return counter
 
