@@ -28,6 +28,7 @@ from seg_losses import DiceLoss
 from load_data import SpleenDataset
 from torch.autograd import Variable
 from torch.utils.data import DataLoader
+from models import UNet
 
 
 # %% import transforms
