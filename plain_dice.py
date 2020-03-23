@@ -7,7 +7,7 @@ class DiceCoeff():
 
     def forward(self, output, target):
         eps = 0.0001
-        self.inter = torch.dot(output.view(-1), target.view(-1))
+        self.inter = torch.dot(output.reshape(-1), target.reshape(-1))
         self.union = torch.sum(output) + torch.sum(target) + eps
 
         t = (2 * self.inter.float() + eps) / self.union.float()

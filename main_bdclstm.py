@@ -119,8 +119,11 @@ def train(epoch, counter):
 
     total_loss = 0
     dice_total = 0
+    count = 0
 
     print('Computing validation loss...')
+
+
 
     for batch_idx, (image1, image2, image3, mask) in enumerate(valid_loader):
         with torch.no_grad():
@@ -140,7 +143,9 @@ def train(epoch, counter):
 
             #force the output to 0 and 1
             pure_output = (output[:,1,:,:].round() > 0).float()
-            dice_total += dice_coeff(pure_output, mask[:, 1, :, :])
+            dice_v = dice_coeff(pure_output, mask[:, 1, :, :])
+            dice_total += dice_v if dice_v < 0.9 else 0
+            count += 1 if dice_v < 0.9 else 0
 
             if SAVE_VALID_IMAGES and epoch in SAVE_EPOCHS:
                 print("SAVING IMAGES")
@@ -153,7 +158,7 @@ def train(epoch, counter):
                     counter += 1
 
     print('Validation Epoch: Loss {}, Avg Loss {}\n'.format(total_loss, total_loss / len(valid_loader.dataset)))
-    print('Dice Coeff Avg {}'.format(dice_total / len(valid_loader))) #divide by num batches
+    print('Dice Coeff Avg {}'.format(dice_total / count)) #divide by num batches
 
     return counter
 
