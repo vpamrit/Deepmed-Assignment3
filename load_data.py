@@ -61,7 +61,7 @@ class SpleenDataset(Dataset):
         self.root_dir = root_dir
         self.transform = transform
         self.img_range = img_range
-        self.cur_sample = Img(None, None, None, 0, 0)
+        self.cur_samples = Img(None, None, None, 0, 0)
         self.cur_sample.complete = True
         self.img_num = img_range[0]
         self.first_img = img_range[0]
@@ -72,6 +72,7 @@ class SpleenDataset(Dataset):
         self.num_slices = int(num_slices)
         self.total_slices = num_slices * num_slices
         self.classes = classes
+        self.samples = []
 
 
         #compute the padding here
@@ -90,8 +91,17 @@ class SpleenDataset(Dataset):
         #compute the total number of frames
         for img_num in range(img_range[0], img_range[1]+1):
             img_file = os.path.join(self.root_dir, TRAIN_DIR, IMG_PREFIX + self.files[img_num] + EXT)
+            label_file = os.path.join(self.root_dir, LABEL_DIR, LABEL_PREFIX + self.files[self.img_num] + EXT) if self.is_labeled else None
+
+            sample = (self.files[self.img_num], process_image(img_file, self.padding), process_image(label_file, self.padding, False)) #img, label, axis, idx
+
+            #create a map of idx to sample | idx to slice_num
+
             print(img_file)
-            self.len += process_image(img_file, padding=0, normalize=False).shape[0]
+            self.samples.append(sample)
+
+        for sample in self.samples:
+            self.len += samples[0].shape[0]
 
         print("Dataset details\n  Images: {}, 2D Slices: {}, Subslices {}, Padding-Margin: {}".format(self.last_img - self.first_img + 1, self.len, self.total_slices, self.padding))
         self.img_num -= 1
