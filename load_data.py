@@ -54,7 +54,7 @@ class Img:
         self.label = label
 
 class SpleenDataset(Dataset):
-    def __init__(self, root_dir, img_range=(0,0), slice_size = 240, slice_stride = 80, num_slices = 5, transform=None, classes=[1,2,3,4,5,6,7,8,9,10,11,12,13]):
+    def __init__(self, root_dir, img_range=(0,1), slice_size = 240, slice_stride = 80, num_slices = 5, transform=None, classes=[1,2,3,4,5,6,7,8,9,10,11,12,13]):
         self.root_dir = root_dir
         self.transform = transform
         self.img_range = img_range
@@ -124,7 +124,7 @@ class SpleenDataset(Dataset):
 
         subject = i
         slice_num = remainder % self.total_slices
-        slice_depth = (remainder - slice_num) / self.samples[i].img.shape[0]
+        slice_depth = (remainder - slice_num) / self.total_slices
 
         return subject, int(slice_depth), int(slice_num)
 
