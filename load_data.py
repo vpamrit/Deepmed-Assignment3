@@ -6,6 +6,7 @@ import torchvision
 import nibabel as nib
 
 from skimage import io, transform
+from bisect import bisect
 import numpy as np
 import matplotlib.pyplot as plt
 from torch.utils.data import Dataset
