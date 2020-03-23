@@ -1,10 +1,26 @@
+
+# %% -*- coding: utf-8 -*-
+'''
+Author: Shreyas Padhy
+Driver file for Standard UNet Implementation
+'''
+from __future__ import print_function
+
 import argparse
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+
 import torch
+import torch.nn as nn
 import torch.optim as optim
-import torchvision
+from torch.autograd import Variable
+from torch.utils.data import DataLoader
+import scipy.io as sio
+import torchvision.transforms as tr
+from tqdm import tqdm
+import numpy as np
+
 from plain_dice import dice_coeff
 
 from losses import DICELossMultiClass, DICELoss
@@ -12,16 +28,13 @@ from seg_losses import DiceLoss
 from load_data import SpleenDataset
 from torch.autograd import Variable
 from torch.utils.data import DataLoader
-import torchvision.transforms as tr
 
-from CLSTM import BDCLSTM
-from models import *
 
 # %% import transforms
 
-
 # %% Training settings
-parser = argparse.ArgumentParser(description='UNet+BDCLSTM')
+parser = argparse.ArgumentParser(
+    description='UNet + BDCLSTM for BraTS Dataset')
 parser.add_argument('--batch-size', type=int, default=4, metavar='N',
                     help='input batch size for training (default: 64)')
 parser.add_argument('--test-batch-size', type=int, default=1000, metavar='N',
@@ -32,78 +45,83 @@ parser.add_argument('--epochs', type=int, default=1, metavar='N',
                     help='number of epochs to train (default: 10)')
 parser.add_argument('--lr', type=float, default=0.001, metavar='LR',
                     help='learning rate (default: 0.01)')
-parser.add_argument('--mom', type=float, default=0.99, metavar='MOM', help='SGD momentum')
 parser.add_argument('--cuda', action='store_true', default=False,
                     help='enables CUDA training (default: False)')
-parser.add_argument('--log-interval', type=int, default=1, metavar='N', help='batches to wait before logging training status')
-parser.add_argument('--test-dataset', action='store_true', default=False,
-                    help='test on smaller dataset (default: False)')
+parser.add_argument('--log-interval', type=int, default=1, metavar='N',
+                    help='batches to wait before logging training status')
 parser.add_argument('--size', type=int, default=128, metavar='N',
                     help='imsize')
-parser.add_argument('--drop', action='store_true', default=False,
-                    help='enables drop')
-parser.add_argument('--data-folder', type=str, default='./data/Training/', metavar='str',
+parser.add_argument('--load', type=str, default=None, metavar='str',
+                    help='weight file to load (default: None)')
+parser.add_argument('--data-folder', type=str, default='./Data/', metavar='str',
                     help='folder that contains data (default: test dataset)')
-
+parser.add_argument('--save', type=str, default='OutMasks', metavar='str',
+                    help='Identifier to save npy arrays with')
+parser.add_argument('--modality', type=str, default='flair', metavar='str',
+                    help='Modality to use for training (default: flair)')
+parser.add_argument('--optimizer', type=str, default='SGD', metavar='str',
+                    help='Optimizer (default: SGD)')
 
 args = parser.parse_args()
 args.cuda = args.cuda and torch.cuda.is_available()
-if args.cuda:
-    print("We are on the GPU!")
+
+DATA_FOLDER = args.data_folder
 
 SAVE_VALID_IMAGES = True
-UNET_MODEL_FILE = 'unetsmall-100-10-0.001'
-SAVE_DIR = './saved_models/lstm/'
-SAVE_EPOCHS = [5, 10, 15]
+SAVE_DIR = './saved_models/unet/'
+SAVE_EPOCHS = [0, 1, 2]
 DATA_FOLDER = args.data_folder
 CLASSES = [1,6,7,8,9,11]
 
 # %% Loading in the Dataset
 slice_size = 240
-dset_train = SpleenDataset(DATA_FOLDER, (1, 1), slice_size, 80, 5, classes=CLASSES) #will this fail due to different size?
+
+# %% Loading in the Dataset
+dset_train = SpleenDataset(DATA_FOLDER, (1, 1), slice_size, 80, 5, classes=CLASSES) #will this fail     due to different size?
 dset_valid = SpleenDataset(DATA_FOLDER, (0, 0), slice_size, 160, 3, classes=CLASSES)
 
 train_loader = DataLoader(dset_train, batch_size=args.batch_size, num_workers=4)
-valid_loader = DataLoader(dset_valid, batch_size=1, num_workers=4)
+valid_loader = DataLoader(dset_valid, batch_size=args.batch_size, num_workers=4)
 
 
-# %% Loading in the models
-unet = UNet(num_classes=(len(CLASSES) + 1))
-#unet.load_state_dict(torch.load(UNET_MODEL_FILE))
-model = BDCLSTM(input_channels=64, hidden_channels=[64], num_classes=(len(CLASSES) + 1))
+print("Training Data : ", len(train_loader.dataset))
+print("Test Data :", len(test_loader.dataset))
+
+# %% Loading in the model
+model = UNet()
 
 if args.cuda:
-    unet.cuda()
     model.cuda()
 
-# Setting Optimizer
-optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.mom)
+if args.optimizer == 'SGD':
+    optimizer = optim.SGD(model.parameters(), lr=args.lr,
+                          momentum=0.99)
+if args.optimizer == 'ADAM':
+    optimizer = optim.Adam(model.parameters(), lr=args.lr,
+                           betas=(args.beta1, args.beta2))
+
+
+# Defining Loss Function
 criterion = DiceLoss()
 
-# Define Training Loop
-def train(epoch, counter):
+
+def train(epoch, loss_lsit):
     model.train()
     for batch_idx, (image1, image2, image3, mask) in enumerate(train_loader):
         if args.cuda:
-            image1, image2, image3, mask = image1.cuda(), \
+            image1, image, image3, mask = image1.cuda(), \
                 image2.cuda(), \
                 image3.cuda(), \
                 mask.cuda()
 
-        image1, image2, image3, mask = Variable(image1), \
+        image1, image, image3, mask = Variable(image1), \
             Variable(image2), \
             Variable(image3), \
             Variable(mask)
 
         optimizer.zero_grad()
 
-        map1 = unet(image1, return_features=True)
-        map2 = unet(image2, return_features=True)
-        map3 = unet(image3, return_features=True)
-
-        print(map1.size())
-
-        output = model(map1, map2, map3)
+        output = model(image)
 
         #print("Mask size is {} Output size is {}".format(mask.size(), output.size()))
         #need to ignore padding border here (for loss)
@@ -112,10 +130,12 @@ def train(epoch, counter):
 
         loss.backward()
         optimizer.step()
+
         if batch_idx % args.log_interval == 0:
-            print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                epoch, batch_idx * len(image1), len(train_loader.dataset),
-                100. * batch_idx / len(train_loader), loss.item()))
+             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tAverage DICE Loss: {:.6f}'.format(
+                 epoch, batch_idx * len(image), len(train_loader.dataset),
+                 100. * batch_idx / len(train_loader), loss.item()))
+
 
     #here we can compute the average dice coefficient on the remaining dataset
     model.eval()
@@ -126,7 +146,6 @@ def train(epoch, counter):
 
     print('Computing validation loss...')
 
-
     #for assembling 3d for dice
     full_mask = torch.Tensor()
     full_out = torch.Tensor()
@@ -135,16 +154,13 @@ def train(epoch, counter):
     # N x C x H x W x D
     for batch_idx, (image1, image2, image3, mask) in enumerate(valid_loader):
         with torch.no_grad():
-            image1, image2, image3, mask = image1.cuda(), \
+            image1, image, image3, mask = image1.cuda(), \
                  image2.cuda(), \
                  image3.cuda(), \
                  mask.cuda()
 
-            map1 = unet(image1, return_features=True)
-            map2 = unet(image2, return_features=True)
-            map3 = unet(image3, return_features=True)
 
-            output = model(map1, map2, map3)
+            output = model(image)
 
             loss = criterion(output, mask)
             total_loss += loss.item()
@@ -176,26 +192,37 @@ def train(epoch, counter):
             if SAVE_VALID_IMAGES and epoch in SAVE_EPOCHS:
                 print("SAVING IMAGES")
                 for i in range(output.size()[0]):
-                    pil_img = torchvision.transforms.functional.to_pil_image((output[i, 1, :, :]*125).squeeze_().cpu())
-                    mask_img = torchvision.transforms.functional.to_pil_image((mask[i, 1, :, :]*125).squeeze_().cpu())
+                    pil_img = torchvision.transforms.functional.to_pil_image((output[i, 1, :, :]*125).  squeeze_().cpu())
+                    mask_img = torchvision.transforms.functional.to_pil_image((mask[i, 1, :, :]*125).   squeeze_().cpu())
 
                     pil_img.save('./gen/gen_img_' + str(counter) + '.png')
                     mask_img.save('./gen/mask_img_' + str(counter) + '.png')
                     counter += 1
 
-    print('Validation Epoch: Loss {}, Avg Loss {}\n'.format(total_loss, total_loss / len(valid_loader.dataset)))
-    print('Dice Coeff Avg {}'.format(dice_total / count)) #divide by num batches
-    print('Full 3D Dice Result {}'.format(dice_coeff(full_mask, full_out)))
+         print('Validation Epoch: Loss {}, Avg Loss {}\n'.format(total_loss, total_loss / len(valid_loader.  dataset)))
+         print('Dice Coeff Avg {}'.format(dice_total / count)) #divide by num batches
+         print('Full 3D Dice Result {}'.format(dice_coeff(full_mask, full_out)))
 
-    return counter
 
-## main
 
-os.makedirs(SAVE_DIR, exist_ok=True)
+loss_list = []
 counter = 0
 
-for i in range(args.epochs):
-    counter = train(i, counter)
-    torch.save(model.state_dict(), SAVE_DIR + 'bdclstm-epoch-{}-'.format(i))
+## main function
+os.makedirs(SAVE_DIR, exist_ok=True)
 
-print("Complete")
+for i in tqdm(range(args.epochs)):
+    train(i, loss_list, counter)
+    torch.save(model.state_dict(), SAVE_DIR + 'unet-final-{}'.format(i))
+
+    counter += 1
+
+plt.plot(loss_list)
+plt.title("UNet bs={}, ep={}, lr={}".format(args.batch_size,
+                                            args.epochs, args.lr))
+plt.xlabel("Number of iterations")
+plt.ylabel("Average DICE loss per batch")
+plt.savefig("./plots/{}-UNet_Loss_bs={}_ep={}_lr={}.png".format(args.save,
+                                                                args.batch_size,
+                                                                args.epochs,
+                                                                args.lr))
