@@ -86,7 +86,13 @@ class SpleenDataset(Dataset):
         self.files = [re.findall('[0-9]{4}', filename)[0] for filename in os.listdir(self.root_dir + TRAIN_DIR)]
         self.files = sorted(self.files, key = lambda f : int(f))
 
-        skew_files = int((img_range[1] - img_range[0] + 1) * skew + 0.5)
+        skew_file_num = int((img_range[1] - img_range[0] + 1) * skew + 0.5)
+        skew_files = self.files[img_range[0]:img_range[1]+1].copy()
+        random.shuffle(skew_files)
+
+        skew_files = skew_files[:skew_file_num]
+
+
 
         print("Files skewed to {} by {}".format(skew_files, skew_start))
 
@@ -99,7 +105,8 @@ class SpleenDataset(Dataset):
             img = process_image(img_file, self.padding, True)
             label =  process_image(label_file, self.padding, False)
 
-            if img_num < img_range[0] + skew_files:
+            if self.files[img_num] in skew_files:
+                print("Skewing...")
                 skew_begin = max(min(int(img.shape[0] * skew_start), max_skew), min_skew)
                 img = img[skew_begin:]
                 label = label[skew_begin:]
