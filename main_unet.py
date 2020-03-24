@@ -43,7 +43,7 @@ parser.add_argument('--train', action='store_true', default=False,
                     help='Argument to train model (default: False)')
 parser.add_argument('--epochs', type=int, default=1, metavar='N',
                     help='number of epochs to train (default: 10)')
-parser.add_argument('--lr', type=float, default=0.001, metavar='LR',
+parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
                     help='learning rate (default: 0.01)')
 parser.add_argument('--cuda', action='store_true', default=False,
                     help='enables CUDA training (default: False)')
