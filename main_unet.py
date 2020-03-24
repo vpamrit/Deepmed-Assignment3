@@ -93,7 +93,7 @@ if args.optimizer == 'ADAM':
 
 
 # Defining Loss Function
-criterion = CombinedLoss([torch.nn.BCEWithLogitsLoss(), DiceLoss]) #GDiceLoss() #DiceLoss(weight=torch.FloatTensor(WEIGHTS))
+criterion = CombinedLoss([torch.nn.BCEWithLogitsLoss(), DiceLoss()]) #GDiceLoss() #DiceLoss(weight=torch.FloatTensor(WEIGHTS))
 
 
 def train(epoch, loss_list, counter):
