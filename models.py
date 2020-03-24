@@ -5,8 +5,8 @@ import torch
 
 class UNet(nn.Module):
     def __init__(self, num_channels=1, num_classes=2, return_features=True):
-        super(UNet, self).__init__()
         self.return_features = return_features
+        super(UNet, self).__init__()
         num_feat = [64, 128, 256, 512, 1024]
 
         self.down1 = nn.Sequential(Conv3x3(num_channels, num_feat[0]))
@@ -35,10 +35,13 @@ class UNet(nn.Module):
         self.up4 = UpConcat(num_feat[1], num_feat[0])
         self.upconv4 = Conv3x3(num_feat[1], num_feat[0])
 
-        self.final = nn.Sequential(nn.Conv2d(num_feat[0],
+        if self.return_features:
+            self.final = nn.Sequential(nn.Conv2d(num_feat[0],
                                              num_classes,
                                              kernel_size=1),
                                    nn.Softmax2d())
+        else:
+            self.final = nn.Conv2d(num_feat[0], num_classes, kernel_size=1)
 
     def forward(self, inputs, return_features=False):
         # print(inputs.data.size())
@@ -70,7 +73,7 @@ class UNet(nn.Module):
         up4_feat = self.upconv4(up4_feat)
         # print(up4_feat.size())
 
-        if return_features or self.return_features:
+        if return_features:
             outputs = up4_feat
         else:
             outputs = self.final(up4_feat)
