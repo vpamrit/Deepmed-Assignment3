@@ -54,7 +54,7 @@ class Img:
         self.label = label
 
 class SpleenDataset(Dataset):
-    def __init__(self, root_dir, img_range=(0,1), slice_size = 240, slice_stride = 80, num_slices = 5, transform=None, classes=[1,2,3,4,5,6,7,8,9,10,11,12,13]):
+    def __init__(self, root_dir, img_range=(0,1), slice_size = 240, slice_stride = 80, num_slices = 5, transform=None, classes=[1,2,3,4,5,6,7,8,9,10,11,12,13], skew=0.85, skew_start=100):
         self.root_dir = root_dir
         self.transform = transform
         self.img_range = img_range
@@ -83,13 +83,24 @@ class SpleenDataset(Dataset):
         self.files = [re.findall('[0-9]{4}', filename)[0] for filename in os.listdir(self.root_dir + TRAIN_DIR)]
         self.files = sorted(self.files, key = lambda f : int(f))
 
+        skew_files = int((img_range[1] - img_range[0] + 1) * skew + 0.5)
+
+        print("Files skewed to {} by {}".format(skew_files, skew_start))
+
+
         #compute the total number of frames
         for img_num in range(img_range[0], img_range[1]+1):
             img_file = os.path.join(self.root_dir, TRAIN_DIR, IMG_PREFIX + self.files[img_num] + EXT)
             label_file = os.path.join(self.root_dir, LABEL_DIR, LABEL_PREFIX + self.files[img_num] + EXT) if self.is_labeled else None
 
-            sample = Img(self.files[img_num], process_image(img_file, self.padding, True), process_image(label_file, self.padding, False)) #img, label, axis, idx
+            img = process_image(img_file, self.padding, True)
+            label =  process_image(label_file, self.padding, False)
 
+            if img_num < img_range[0] + skew_files:
+                img = img[skew_start:]
+                label = label[skew_start:]
+
+            sample = Img(self.files[img_num], img, label) # num, img, label
             sample_len = sample.img.shape[0]
 
             # create a map of idx to sample | idx to slice_num
@@ -97,6 +108,7 @@ class SpleenDataset(Dataset):
             self.breakpoints.append(self.len)
 
             print(img_file)
+            print(img.shape)
             self.samples.append(sample)
 
         #remove the last unnecessary element
@@ -168,13 +180,15 @@ class SpleenDataset(Dataset):
             print("SAVING {}".format(img_name))
             im.save('./gen/gen_' + str(img_name).zfill(4) + ".png")
             im = Image.fromarray(np.uint8(prev_img_slice))
-            im.save('./gen/gen_' + str(img_name).zfill(4) + "_prev.png")
+            #im.save('./gen/gen_' + str(img_name).zfill(4) + "_prev.png")
             im = Image.fromarray(np.uint8(next_img_slice))
-            im.save('./gen/gen_' + str(img_name).zfill(4) + "_next.png")
+            #im.save('./gen/gen_' + str(img_name).zfill(4) + "_next.png")
 
             for i in range(img_label.shape[0]):
                 im = Image.fromarray(np.uint8(img_label[i, :, :])*125)
-                im.save('./gen/gen_' + str(img_name).zfill(4) + "_mask_" + str(i) + ".png")
+
+                if i == 1:
+                    im.save('./gen/gen_' + str(img_name).zfill(4) + "_mask_" + str(i) + ".png")
 
 
         #update the current object's status
