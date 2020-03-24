@@ -26,6 +26,7 @@ from load_data import SpleenDataset
 from torch.autograd import Variable
 from torch.utils.data import DataLoader
 from models import UNet
+from PIL import Image
 
 parser = argparse.ArgumentParser(
      description='UNet + BDCLSTM for BraTS Dataset')
@@ -44,14 +45,21 @@ print(args.test_img_range)
 mrange = tuple(args.test_img_range)
 
 
-def save_images(img, sample_num, counter):
+def save_images(img, sample_num, counter, multiplier=1.0):
     print("SAVING IMAGES")
-    for i in range(output.size()[0]):
+    for i in range(img.size()[0]):
 
-        pil_img = torchvision.transforms.functional.to_pil_image((output[i, 0, :, :]).unsqueeze_(0).cpu())
-        mask_img = torchvision.transforms.functional.to_pil_image((mask[i, 1, :, :]*125).unsqueeze_(0).cpu())
-        pil_img.save('./gen/gen_img_' + str(i+1) + '_' + str(counter) + '.png')
-        mask_img.save('./gen/mask_img_'+ str(i+1) + '_' + str(counter) + '.png')
+        new_arr = (img[i, int(multiplier!=1.0), :, :]*multiplier).cpu().byte()
+        #nparray = np.uint8(new_arr.numpy()) #this seems to work
+        #im = Image.fromarray(nparray)
+
+        pil_img = torchvision.transforms.functional.to_pil_image(new_arr, mode='L')
+
+
+        if multiplier == 125.0:
+            pil_img.save('./gen/mask_img_'+ str(i+1) + '_' + str(counter) + '.png')
+        else:
+            pil_img.save('./gen/gen_img_' + str(i+1) + '_' + str(counter) + '.png')
 
 for i in range(mrange[0], mrange[1]+1):
     dset_test = dset_train = SpleenDataset(DATA_FOLDER, tuple([i, i]), SLICE_SIZE, 80, 5,classes=CLASSES) #will this fail due to different size?
@@ -72,7 +80,7 @@ for i in range(mrange[0], mrange[1]+1):
             # let us try saving it :)
             if SAVE_TEST_IMAGES:
                 save_images(output, i, counter)
-                save_images(mask, i, counter)
+                save_images(mask, i, counter, 125.0)
                 counter += 1
 
 
