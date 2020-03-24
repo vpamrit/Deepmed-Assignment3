@@ -12,9 +12,9 @@ class CombinedLoss(nn.Module):
         self.losses = losses
 
     def forward(self, net_output, gt):
-        mloss = torch.zeros([1])
+        mloss = losses[0](net_output, gt) * self.weights[0]
 
-        for i in range(len(losses)):
+        for i in range(1, len(losses)):
             mloss += self.losses[i](net_output, gt) * self.weights[i]
 
         return mloss
