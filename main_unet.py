@@ -59,7 +59,8 @@ parser.add_argument('--save', type=str, default='OutMasks', metavar='str',
 parser.add_argument('--modality', type=str, default='flair', metavar='str',
                     help='Modality to use for training (default: flair)')
 parser.add_argument('--optimizer', type=str, default='SGD', metavar='str',
-                    help='Optimizer (default: SGD)')
+parser.add_argument('--train_img_range', type=int, nargs=2, default=[1, 20], help='Image range for train')
+parser.add_argument('--valid_img_range', type=int, nargs=2,  default=[24, 25], help='Image range for train')
 
 args = parser.parse_args()
 args.cuda = args.cuda and torch.cuda.is_available()
@@ -67,11 +68,8 @@ args.cuda = args.cuda and torch.cuda.is_available()
 DATA_FOLDER = args.data_folder
 
 # %% Loading in the Dataset
-slice_size = 240
-
-# %% Loading in the Dataset
-dset_train = SpleenDataset(DATA_FOLDER, (0, 20), slice_size, 80, 5, classes=CLASSES) #will this fail     due to different size?
-dset_valid = SpleenDataset(DATA_FOLDER, (25, 26), slice_size, 160, 3, classes=CLASSES)
+dset_train = SpleenDataset(DATA_FOLDER, tuple(args.train_img_range), SLICE_SIZE, 80, 5, classes=CLASSES) #will this fail     due to different size?
+dset_valid = SpleenDataset(DATA_FOLDER, tuple(arg.valid_img_range), SLICE_SIZE, 160, 3, classes=CLASSES)
 
 train_loader = DataLoader(dset_train, batch_size=args.batch_size, num_workers=4, shuffle=True)
 valid_loader = DataLoader(dset_valid, batch_size=args.batch_size, num_workers=4)
