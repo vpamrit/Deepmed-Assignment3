@@ -20,10 +20,11 @@ from config import *
 import numpy as np
 import torchvision
 
-from plain_dice import dice_coeff
-from other_losses import GDiceLoss
+from losses.plain_dice import dice_coeff
+from losses.other_losses import GDiceLoss
+from losses.seg_losses import DiceLoss
+from losses.combined_loss import CombinedLoss
 
-from seg_losses import DiceLoss
 from load_data import SpleenDataset
 from torch.autograd import Variable
 from torch.utils.data import DataLoader
@@ -60,7 +61,7 @@ parser.add_argument('--save', type=str, default='OutMasks', metavar='str',
 parser.add_argument('--modality', type=str, default='flair', metavar='str',
                     help='Modality to use for training (default: flair)')
 parser.add_argument('--optimizer', type=str, default='SGD', metavar='str')
-parser.add_argument('--train_img_range', type=int, nargs=2, default=[1, 20], help='Image range for train')
+parser.add_argument('--train_img_range', type=int, nargs=2, default=[1, 23], help='Image range for train')
 parser.add_argument('--valid_img_range', type=int, nargs=2,  default=[24, 25], help='Image range for train')
 
 args = parser.parse_args()
@@ -69,7 +70,7 @@ args.cuda = args.cuda and torch.cuda.is_available()
 DATA_FOLDER = args.data_folder
 
 # %% Loading in the Dataset
-dset_train = SpleenDataset(DATA_FOLDER, tuple(args.train_img_range), SLICE_SIZE, 80, 5, classes=CLASSES) #will this fail     due to different size?
+dset_train = SpleenDataset(DATA_FOLDER, tuple(args.train_img_range), SLICE_SIZE, 80, 5, classes=CLASSES) #will this fail due to different size?
 dset_valid = SpleenDataset(DATA_FOLDER, tuple(args.valid_img_range), SLICE_SIZE, 160, 3, classes=CLASSES)
 
 train_loader = DataLoader(dset_train, batch_size=args.batch_size, num_workers=4, shuffle=True)
@@ -92,7 +93,7 @@ if args.optimizer == 'ADAM':
 
 
 # Defining Loss Function
-criterion = torch.nn.BCEWithLogitsLoss() #GDiceLoss() #DiceLoss(weight=torch.FloatTensor(WEIGHTS))
+criterion = CombinedLoss([torch.nn.BCEWithLogitsLoss(), DiceLoss]) #GDiceLoss() #DiceLoss(weight=torch.FloatTensor(WEIGHTS))
 
 
 def train(epoch, loss_list, counter):

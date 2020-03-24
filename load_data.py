@@ -67,6 +67,7 @@ class SpleenDataset(Dataset):
         self.classes = classes
         self.samples = []
         self.breakpoints = []
+        self.blackness = set()
 
         max_skew = 105
         min_skew = 20
