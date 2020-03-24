@@ -22,7 +22,6 @@ import torchvision
 
 from plain_dice import dice_coeff
 
-from losses import DICELossMultiClass, DICELoss
 from seg_losses import DiceLoss
 from load_data import SpleenDataset
 from torch.autograd import Variable
@@ -43,7 +42,7 @@ parser.add_argument('--train', action='store_true', default=False,
                     help='Argument to train model (default: False)')
 parser.add_argument('--epochs', type=int, default=1, metavar='N',
                     help='number of epochs to train (default: 10)')
-parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
+parser.add_argument('--lr', type=float, default=0.001, metavar='LR',
                     help='learning rate (default: 0.01)')
 parser.add_argument('--cuda', action='store_true', default=False,
                     help='enables CUDA training (default: False)')
@@ -94,7 +93,7 @@ if args.optimizer == 'ADAM':
 
 
 # Defining Loss Function
-criterion = DiceLoss()
+criterion = DiceLoss(weights=WEIGHTS)
 
 
 def train(epoch, loss_list, counter):
