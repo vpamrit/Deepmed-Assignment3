@@ -54,7 +54,7 @@ class Img:
         self.label = label
 
 class SpleenDataset(Dataset):
-    def __init__(self, root_dir, img_range=(0,1), slice_size = 240, slice_stride = 80, num_slices = 5, transform=None, classes=[1,2,3,4,5,6,7,8,9,10,11,12,13], skew=0.85, skew_start=100):
+    def __init__(self, root_dir, img_range=(0,1), slice_size = 240, slice_stride = 80, num_slices = 5, transform=None, classes=[1,2,3,4,5,6,7,8,9,10,11,12,13], skew=0.7, skew_start=100):
         self.root_dir = root_dir
         self.transform = transform
         self.img_range = img_range
