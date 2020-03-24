@@ -54,7 +54,7 @@ class Img:
         self.label = label
 
 class SpleenDataset(Dataset):
-    def __init__(self, root_dir, img_range=(0,1), slice_size = 240, slice_stride = 80, num_slices = 5, transform=None, classes=[1,2,3,4,5,6,7,8,9,10,11,12,13], skew=0.7, skew_start=100):
+    def __init__(self, root_dir, img_range=(0,1), slice_size = 240, slice_stride = 80, num_slices = 5, transform=None, classes=[1,2,3,4,5,6,7,8,9,10,11,12,13], skew=0.7, skew_start=0.75):
         self.root_dir = root_dir
         self.transform = transform
         self.img_range = img_range
@@ -68,6 +68,9 @@ class SpleenDataset(Dataset):
         self.classes = classes
         self.samples = []
         self.breakpoints = []
+
+        max_skew = 105
+        min_skew = 20
 
 
         #compute the padding here
@@ -97,8 +100,9 @@ class SpleenDataset(Dataset):
             label =  process_image(label_file, self.padding, False)
 
             if img_num < img_range[0] + skew_files:
-                img = img[skew_start:]
-                label = label[skew_start:]
+                skew_begin = max(min(int(img.shape[0] * skew_start), max_skew), min_skew)
+                img = img[skew_begin:]
+                label = label[skew_begin:]
 
             sample = Img(self.files[img_num], img, label) # num, img, label
             sample_len = sample.img.shape[0]
