@@ -80,7 +80,7 @@ print("Training Data : ", len(train_loader.dataset))
 print("Validation Data :", len(valid_loader.dataset))
 
 # %% Loading in the model
-model = UNet(num_classes=len(CLASSES)+1)
+model = UNet(num_classes=len(CLASSES)+1, return_features=True)
 model.cuda()
 
 if args.optimizer == 'SGD':
@@ -92,7 +92,7 @@ if args.optimizer == 'ADAM':
 
 
 # Defining Loss Function
-criterion = GDiceLoss() #DiceLoss(weight=torch.FloatTensor(WEIGHTS))
+criterion = torch.nn.BCEWithLogitsLoss() #GDiceLoss() #DiceLoss(weight=torch.FloatTensor(WEIGHTS))
 
 
 def train(epoch, loss_list, counter):
