@@ -38,7 +38,6 @@ def process_image(img_file, padding=0, normalize=True):
         img = (img - img.min()) / (img.max() - img.min())
         img = img * 255.0
 
-
     img = np.transpose(img, (2,0,1))
 
     if padding != 0:
