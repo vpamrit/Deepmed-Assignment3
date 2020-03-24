@@ -70,7 +70,7 @@ DATA_FOLDER = args.data_folder
 slice_size = 240
 
 # %% Loading in the Dataset
-dset_train = SpleenDataset(DATA_FOLDER, (0, 24), slice_size, 80, 5, classes=CLASSES) #will this fail     due to different size?
+dset_train = SpleenDataset(DATA_FOLDER, (0, 20), slice_size, 80, 5, classes=CLASSES) #will this fail     due to different size?
 dset_valid = SpleenDataset(DATA_FOLDER, (25, 26), slice_size, 160, 3, classes=CLASSES)
 
 train_loader = DataLoader(dset_train, batch_size=args.batch_size, num_workers=4, shuffle=True)
