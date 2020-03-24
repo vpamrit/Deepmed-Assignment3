@@ -85,7 +85,7 @@ class DiceLoss(nn.Module):
         assert predict.shape == target.shape, 'predict & target shape do not match'
         dice = BinaryDiceLoss(**self.kwargs)
         total_loss = 0
-        predict = F.softmax(predict, dim=1)
+        #predict = F.softmax(predict, dim=1)
 
         for i in range(target.shape[1]):
             if i != self.ignore_index:
