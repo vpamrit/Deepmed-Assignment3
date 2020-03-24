@@ -1,7 +1,7 @@
 import torch
 
 
-class CombinedLoss(nn.Module):
+class CombinedLoss(torch.nn.Module):
     def __init__(self, losses=[], weights=None):
         super(CombinedLosses, self).__init__()
 
