@@ -45,49 +45,40 @@ print(args.test_img_range)
 mrange = tuple(args.test_img_range)
 
 
-def save_images(img, sample_num, counter, multiplier=1.0):
+def save_images(img, sample_num, counter, multiplier=1.0, real_img=False, tag=''):
     print("SAVING IMAGES")
     for i in range(img.size()[0]):
 
-        new_arr = (img[i, int(multiplier!=1.0), :, :]*multiplier).cpu().byte()
+        new_arr = (img[i, int(not real_img), :, :]*multiplier).cpu().byte()
+
+        print("MAX: {} MIN {}".format(torch.max(new_arr).item(), torch.min(new_arr).item()))
         #nparray = np.uint8(new_arr.numpy()) #this seems to work
         #im = Image.fromarray(nparray)
 
         pil_img = torchvision.transforms.functional.to_pil_image(new_arr, mode='L')
 
 
-        if multiplier == 125.0:
-            pil_img.save('./gen/mask_img_'+ str(i+1) + '_' + str(counter) + '.png')
-        else:
-            pil_img.save('./gen/gen_img_' + str(i+1) + '_' + str(counter) + '.png')
+        pil_img.save('./gen/'+ tag + '_img_'+ str(i+1) + '_' + str(counter) + '.png')
 
 for i in range(mrange[0], mrange[1]+1):
     dset_test = dset_train = SpleenDataset(DATA_FOLDER, tuple([i, i]), SLICE_SIZE, 80, 5,classes=CLASSES) #will this fail due to different size?
     test_loader = DataLoader(dset_train, batch_size=1, num_workers=1)
 
     # load the model
-    #model = UNet(num_classes = len(CLASSES) + 1)
-    #model.load_state_dict(torch.load(args.model_folder))
-    #model.eval()
+    model = UNet(num_classes = len(CLASSES) + 1)
+    model.load_state_dict(torch.load(args.model_folder))
+    model.cuda()
+    model.eval()
 
     counter = 0
     for batch_idx, (image1, image2, image3, mask) in enumerate(test_loader):
         with torch.no_grad():
             image1, image2, image3, mask = image1.cuda(), image2.cuda(), image3.cuda(), mask.cuda()
-            output = image2
-    #         output = model(image2)
+            #output = image2
+            output = model(image2)
 
             # let us try saving it :)
             if SAVE_TEST_IMAGES:
-                save_images(output, i, counter)
-                save_images(mask, i, counter, 125.0)
+                save_images(output, i, counter, 255.0, real_img=True)
+                save_images(mask, i, counter, 255.0, tag='mask')
                 counter += 1
-
-
-    # we get a slice one-by-one from 1 sample (now we have to assemble it)
-
-
-
-
-
-

@@ -21,6 +21,7 @@ import numpy as np
 import torchvision
 
 from plain_dice import dice_coeff
+from other_losses import GDiceLoss
 
 from seg_losses import DiceLoss
 from load_data import SpleenDataset
@@ -91,7 +92,7 @@ if args.optimizer == 'ADAM':
 
 
 # Defining Loss Function
-criterion = DiceLoss(weight=torch.FloatTensor(WEIGHTS))
+criterion = GDiceLoss() #DiceLoss(weight=torch.FloatTensor(WEIGHTS))
 
 
 def train(epoch, loss_list, counter):

@@ -5,4 +5,5 @@ gen/
 Testsite.ipynb
 __pycache__/
 data.py
+model/
 
