@@ -93,7 +93,7 @@ if args.optimizer == 'ADAM':
 
 
 # Defining Loss Function
-criterion = DiceLoss(weights=WEIGHTS)
+criterion = DiceLoss(weight=WEIGHTS)
 
 
 def train(epoch, loss_list, counter):
