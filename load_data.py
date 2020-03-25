@@ -53,7 +53,7 @@ class Img:
         self.label = label
 
 class SpleenDataset(Dataset):
-    def __init__(self, root_dir, img_range=(0,1), slice_size = 240, slice_stride = 80, num_slices = 5, transform=None, classes=[1,2,3,4,5,6,7,8,9,10,11,12,13], skew=0.7, skew_start=0.75):
+    def __init__(self, root_dir, img_range=(0,1), slice_size = 240, slice_stride = 80, num_slices = 5, transform=None, classes=[1,2,3,4,5,6,7,8,9,10,11,12,13], skew=0.7, skew_start=0.5, threshold=0.01):
         self.root_dir = root_dir
         self.transform = transform
         self.img_range = img_range
@@ -67,7 +67,7 @@ class SpleenDataset(Dataset):
         self.classes = classes
         self.samples = []
         self.breakpoints = []
-        self.blackness = set()
+        self.filtered_set = []
 
         max_skew = 105
         min_skew = 20
@@ -125,6 +125,9 @@ class SpleenDataset(Dataset):
         #remove the last unnecessary element
         del self.breakpoints[-1]
 
+        #clean the dataset with the filtered one
+        self.clean(threshold)
+
         print("Dataset details\n  Images: {}, 2D Slices: {}, Subslices {}, Padding-Margin: {}".format(self.last_img - self.first_img + 1, self.len, self.total_slices, self.padding))
         print("Breakpoints: {}".format(self.breakpoints))
         print(self.len)
@@ -151,7 +154,7 @@ class SpleenDataset(Dataset):
 
 
     #return start of next slice for the current sample
-    def get_next_slices(self, idx):
+    def fetch_slice(self, idx, save=False):
 
         subject_num, slice_depth, slice_num = self.decode_idx(idx)
         #print("Subject_num {} slice depth {} slice_num {} idx {}".format(subject_num, slice_depth, slice_num, idx))
@@ -185,7 +188,7 @@ class SpleenDataset(Dataset):
         img_label = tmp_label.astype('float32')
 
 
-        if SAVE_IMAGES:
+        if save:
             im = Image.fromarray(np.uint8(img_slice))
             img_name = "{}_{}_{}".format(cur_sample.img_name, slice_depth, slice_num)
             print("SAVING {}".format(img_name))
@@ -206,7 +209,7 @@ class SpleenDataset(Dataset):
         return prev_img_slice, img_slice, next_img_slice, img_label
 
     def __len__(self):
-        return self.len
+        return len(self.filtered_set)
 
     # TODO: this needs to work based on the index (that's how the iteration begins again!)
     # TODO: it can just reset to previous state
@@ -214,8 +217,10 @@ class SpleenDataset(Dataset):
         if torch.is_tensor(idx):
             idx = idx.tolist()
 
+        idx = self.filtered_set[idx] #translates from full dataset to filtered data
+
         #get the next slice
-        prev_img_slice, img_slice, next_img_slice, img_label = self.get_next_slices(idx)
+        prev_img_slice, img_slice, next_img_slice, img_label = self.fetch_slice(idx, SAVE_IMAGES)
 
         # convert to tensors
         imgcs = torch.from_numpy(img_slice).unsqueeze(0)
@@ -225,3 +230,22 @@ class SpleenDataset(Dataset):
 
         return imgps, imgcs, imgns, mask
 
+    def passes_threshold(self, nparray, threshold):
+        percent = np.sum(nparray[1] == SPLEEN_VAL) / np.size(nparray[1])
+
+        print("PERCENT is {}".format(percent))
+
+        return percent > threshold
+
+
+    def clean(self, threshold):
+        # if the blackness exceeds a threshold then don't put it in
+        self.filtered_set = []
+
+        for i in range(self.len):
+            prev, now, nxt, label = self.fetch_slice(i, False)
+
+            if threshold == 0 or self.passes_threshold(label, threshold):
+                self.filtered_set.append(i)
+
+        print("Filtered set size is {}".format(len(self.filtered_set)))
