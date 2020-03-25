@@ -88,7 +88,7 @@ num_classes = len(CLASSES)+1
 model = DeepLabV3(num_classes = num_classes) #UNet(num_classes=num_classes)
 
 if args.load_model != None:
-    model.load_state_dict(args.load_model)
+    model.load_state_dict(torch.load(args.load_model))
 
 V3 = True
 
