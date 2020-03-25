@@ -68,10 +68,11 @@ args = parser.parse_args()
 args.cuda = args.cuda and torch.cuda.is_available()
 
 DATA_FOLDER = args.data_folder
+THRESHOLD = 0.01
 
 # %% Loading in the Dataset
-dset_train = SpleenDataset(DATA_FOLDER, tuple(args.train_img_range), SLICE_SIZE, 80, 5, classes=CLASSES) #will this fail due to different size?
-dset_valid = SpleenDataset(DATA_FOLDER, tuple(args.valid_img_range), SLICE_SIZE, 160, 3, classes=CLASSES)
+dset_train = SpleenDataset(DATA_FOLDER, tuple(args.train_img_range), SLICE_SIZE, 80, 5, classes=CLASSES, threshold=THRESHOLD)
+dset_valid = SpleenDataset(DATA_FOLDER, tuple(args.valid_img_range), SLICE_SIZE, 160, 3, classes=CLASSES, threshold=THRESHOLD)
 
 train_loader = DataLoader(dset_train, batch_size=args.batch_size, num_workers=4, shuffle=True)
 valid_loader = DataLoader(dset_valid, batch_size=args.batch_size, num_workers=4)
@@ -199,9 +200,16 @@ counter = 0
 ## main function
 os.makedirs(SAVE_DIR, exist_ok=True)
 
+
 for i in tqdm(range(args.epochs)):
     train(i, loss_list, counter)
     torch.save(model.state_dict(), SAVE_DIR + 'unet-final-{}'.format(i))
+
+    if i % 5:
+        THRESHOLD = THRESHOLD / 2 if THRESHOLD > 0.005 else 0
+        dset_train.clean(THRESHOLD)
+        dset_valid.clean(THRESHOLD)
+
 
     counter += 1
 

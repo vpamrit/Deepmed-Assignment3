@@ -18,7 +18,7 @@ from os.path import join, isfile
 from os import listdir
 
 #constants
-SAVE_IMAGES = True
+SAVE_IMAGES = False
 TRAIN_DIR = 'img/'
 IMG_PREFIX = 'img'
 LABEL_DIR = 'label/'
@@ -130,7 +130,7 @@ class SpleenDataset(Dataset):
 
         print("Dataset details\n  Images: {}, 2D Slices: {}, Subslices {}, Padding-Margin: {}".format(self.last_img - self.first_img + 1, self.len, self.total_slices, self.padding))
         print("Breakpoints: {}".format(self.breakpoints))
-        print(self.len)
+        print("Full length is {}".format(self.len))
 
 
     # decodes an index to a subject's sample, a depth slice, and a 2D grid slice
@@ -232,8 +232,6 @@ class SpleenDataset(Dataset):
 
     def passes_threshold(self, nparray, threshold):
         percent = np.sum(nparray[1] == SPLEEN_VAL) / np.size(nparray[1])
-
-        print("PERCENT is {}".format(percent))
 
         return percent > threshold
 
