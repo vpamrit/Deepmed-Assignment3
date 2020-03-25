@@ -195,14 +195,32 @@ def train(epoch, loss_list, counter):
                     mask_img.save('./gen/mask_img_' + str(counter) + '.png')
                     counter += 1
 
-    print('Validation Epoch: Loss {}, Avg Loss {}\n'.format(total_loss, total_loss / len(valid_loader.  dataset)))
-    print('Dice Coeff Avg {}'.format(dice_total / (max(1, count)))) #divide by num batches
-    print('Full 3D Dice Result {}'.format(dice_coeff(full_mask, full_out)))
+    avg_loss = total_loss, total_loss / len(valid_loader.  dataset)
+    avg_dice = dice_total / (max(1, count)) #divide by num batches
+    avg_3D_dice = dice_coeff(full_mask, full_out)
+
+    print('Validation Epoch: Loss {}, Avg Loss {}\n'.format(avg_loss))
+    print('Dice Coeff Avg {}'.format(avg_dice))
+    print('Full 3D Dice Result {}'.format(avg_3D_dice)
+    loss_list[0].append(avg_loss)
+    loss_list[1].append(avg_dice)
+    loss_list[2].append(avg_3D_dice)
 
 
+def save_create_plot(loss_list, plot_name):
+    plt.plot(loss_list)
+    plt.title("UNet bs={}, ep={}, lr={}".format(args.batch_size,
+                                                i, args.lr))
+    plt.xlabel("Number of iterations")
+    plt.ylabel("Loss")
+    plt.savefig("./{}_Loss_bs={}_lr={}.png".format(plot_name,
+                                                      args.batch_size,
+                                                      args.lr))
 
-loss_list = []
+
+loss_list = [[], [], []]
 counter = 0
+
 
 ## main function
 os.makedirs(SAVE_DIR, exist_ok=True)
@@ -212,20 +230,16 @@ for i in tqdm(range(args.epochs)):
     train(i, loss_list, counter)
     torch.save(model.state_dict(), SAVE_DIR + 'deeplabv3-final-{}.pth'.format(i))
 
-    if (i+1) % 6 == 0:
-        THRESHOLD = THRESHOLD / 2 if THRESHOLD > 0.005 else 0.00
+    if (i+1) % 8 == 0:
+        THRESHOLD = THRESHOLD / 2 if THRESHOLD > 0.003 else 0.00
         dset_train.clean(THRESHOLD)
         dset_valid.clean(THRESHOLD)
 
 
     counter += 1
 
-plt.plot(loss_list)
-plt.title("UNet bs={}, ep={}, lr={}".format(args.batch_size,
-                                            args.epochs, args.lr))
-plt.xlabel("Number of iterations")
-plt.ylabel("Average DICE loss per batch")
-plt.savefig("./plots/{}-UNet_Loss_bs={}_ep={}_lr={}.png".format(args.save,
-                                                                args.batch_size,
-                                                                args.epochs,
-                                                                args.lr))
+    # overwrite plot at the end of each iteration
+    save_create_plot(loss_list[0], 'Avg_Loss')
+    save_create_plot(loss_list[1], '2D_ Dice')
+    save_create_plot(loss_list[2], '3D_Dice')
+
