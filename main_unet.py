@@ -199,12 +199,13 @@ def train(epoch, loss_list, counter):
     avg_dice = dice_total / (max(1, count)) #divide by num batches
     avg_3D_dice = dice_coeff(full_mask, full_out)
 
-    print('Validation Epoch: Loss {}, Avg Loss {}\n'.format(avg_loss))
-    print('Dice Coeff Avg {}'.format(avg_dice))
-    print('Full 3D Dice Result {}'.format(avg_3D_dice)
     loss_list[0].append(avg_loss)
     loss_list[1].append(avg_dice)
     loss_list[2].append(avg_3D_dice)
+
+    print('Validation Epoch: Loss {}, Avg Loss {}\n'.format(avg_loss))
+    print('Dice Coeff Avg {}'.format(avg_dice))
+    print('Full 3D Dice Result {}'.format(avg_3D_dice))
 
 
 def save_create_plot(loss_list, plot_name):
@@ -213,9 +214,7 @@ def save_create_plot(loss_list, plot_name):
                                                 i, args.lr))
     plt.xlabel("Number of iterations")
     plt.ylabel("Loss")
-    plt.savefig("./{}_Loss_bs={}_lr={}.png".format(plot_name,
-                                                      args.batch_size,
-                                                      args.lr))
+    plt.savefig("./{}_Loss_bs={}_lr={}.png".format(plot_name, args.batch_size, args.lr))
 
 
 loss_list = [[1.2], [1.2], [1.2]]
