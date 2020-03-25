@@ -62,7 +62,7 @@ parser.add_argument('--save', type=str, default='OutMasks', metavar='str',
 parser.add_argument('--modality', type=str, default='flair', metavar='str',
                     help='Modality to use for training (default: flair)')
 parser.add_argument('--optimizer', type=str, default='SGD', metavar='str')
-parser.add_argument('--train_img_range', type=int, nargs=2, default=[1, 23], help='Image range for train')
+parser.add_argument('--train_img_range', type=int, nargs=2, default=[0, 24], help='Image range for train')
 parser.add_argument('--valid_img_range', type=int, nargs=2,  default=[24, 25], help='Image range for train')
 
 args = parser.parse_args()
@@ -114,7 +114,6 @@ def train(epoch, loss_list, counter):
             image2 = torch.cat([image1, image2, image3], dim=1)
 
         optimizer.zero_grad()
-        print(image2.size())
         output = model(image2)
 
         #print("Mask size is {} Output size is {}".format(mask.size(), output.size()))
@@ -208,7 +207,7 @@ for i in tqdm(range(args.epochs)):
     train(i, loss_list, counter)
     torch.save(model.state_dict(), SAVE_DIR + 'unet-final-{}'.format(i))
 
-    if (i+1) % 12 == 0:
+    if (i+1) % 5 == 0:
         THRESHOLD = THRESHOLD / 2 if THRESHOLD > 0.005 else 0
         dset_train.clean(THRESHOLD)
         dset_valid.clean(THRESHOLD)
