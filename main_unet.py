@@ -98,7 +98,7 @@ if args.optimizer == 'ADAM':
 
 
 # Defining Loss Function
-criterion = torch.nn.BCEWithLogitsLoss() #CombinedLoss([torch.nn.BCELoss(), DiceLoss()]) #DiceLoss(weight=torch.FloatTensor(WEIGHTS))
+criterion = CombinedLoss([torch.nn.BCEWithLogitsLoss(), DiceLoss()]) #torch.nn.BCEWithLogitsLoss() #DiceLoss(weight=torch.FloatTensor(WEIGHTS))
 
 
 def train(epoch, loss_list, counter):
@@ -205,7 +205,7 @@ os.makedirs(SAVE_DIR, exist_ok=True)
 
 for i in tqdm(range(args.epochs)):
     train(i, loss_list, counter)
-    torch.save(model.state_dict(), SAVE_DIR + 'unet-final-{}'.format(i))
+    torch.save(model.state_dict(), SAVE_DIR + 'deeplabv3-final-{}.pth'.format(i))
 
     if (i+1) % 5 == 0:
         THRESHOLD = THRESHOLD / 2 if THRESHOLD > 0.005 else 0
