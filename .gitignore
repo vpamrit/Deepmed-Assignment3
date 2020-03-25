@@ -6,4 +6,5 @@ Testsite.ipynb
 __pycache__/
 data.py
 model/
+pretrained_models/
 

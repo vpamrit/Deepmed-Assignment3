@@ -72,8 +72,8 @@ DATA_FOLDER = args.data_folder
 THRESHOLD = 0.01
 
 # %% Loading in the Dataset
-dset_train = SpleenDataset(DATA_FOLDER, tuple(args.train_img_range), SLICE_SIZE, 80, 5, classes=CLASSES, threshold=THRESHOLD)
-dset_valid = SpleenDataset(DATA_FOLDER, tuple(args.valid_img_range), SLICE_SIZE, 160, 3, classes=CLASSES, threshold=THRESHOLD)
+dset_train = SpleenDataset(DATA_FOLDER, tuple(args.train_img_range), SLICE_SIZE, 150, 3, classes=CLASSES, threshold=THRESHOLD)
+dset_valid = SpleenDataset(DATA_FOLDER, tuple(args.valid_img_range), SLICE_SIZE, 150, 3, classes=CLASSES, threshold=THRESHOLD)
 
 train_loader = DataLoader(dset_train, batch_size=args.batch_size, num_workers=4, shuffle=True)
 valid_loader = DataLoader(dset_valid, batch_size=args.batch_size, num_workers=4)
