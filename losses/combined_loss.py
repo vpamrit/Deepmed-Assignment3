@@ -3,7 +3,7 @@ import torch
 
 class CombinedLoss(torch.nn.Module):
     def __init__(self, losses=[], weights=None):
-        super(CombinedLosses, self).__init__()
+        super(CombinedLoss, self).__init__()
 
         if weights == None:
             weights = [1] * len(losses)
