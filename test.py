@@ -52,7 +52,7 @@ def save_images(img, sample_num, counter, multiplier=1.0, real_img=False, tag=''
 
         new_arr = (img[i, int(not real_img), :, :]*multiplier).cpu().byte()
 
-        print("MAX: {} MIN {}".format(torch.max(new_arr).item(), torch.min(new_arr).item()))
+        #print("MAX: {} MIN {}".format(torch.max(new_arr).item(), torch.min(new_arr).item()))
         #nparray = np.uint8(new_arr.numpy()) #this seems to work
         #im = Image.fromarray(nparray)
 

@@ -64,12 +64,13 @@ parser.add_argument('--modality', type=str, default='flair', metavar='str',
 parser.add_argument('--optimizer', type=str, default='SGD', metavar='str')
 parser.add_argument('--train_img_range', type=int, nargs=2, default=[0, 24], help='Image range for train')
 parser.add_argument('--valid_img_range', type=int, nargs=2,  default=[24, 25], help='Image range for train')
+parser.add_argument('--load_model', type=str, default=None, help='Image range for train')
 
 args = parser.parse_args()
 args.cuda = args.cuda and torch.cuda.is_available()
 
 DATA_FOLDER = args.data_folder
-THRESHOLD = 0.01
+THRESHOLD = 0.005
 
 # %% Loading in the Dataset
 dset_train = SpleenDataset(DATA_FOLDER, tuple(args.train_img_range), SLICE_SIZE, 150, 3, classes=CLASSES, threshold=THRESHOLD)
@@ -85,6 +86,10 @@ print("Validation Data :", len(valid_loader.dataset))
 # %% Loading in the model
 num_classes = len(CLASSES)+1
 model = DeepLabV3(num_classes = num_classes) #UNet(num_classes=num_classes)
+
+if args.load_model != None:
+    model.load_state_dict(args.load_model)
+
 V3 = True
 
 model.cuda()
@@ -98,7 +103,7 @@ if args.optimizer == 'ADAM':
 
 
 # Defining Loss Function
-criterion = CombinedLoss([torch.nn.BCEWithLogitsLoss(), DiceLoss()]) #torch.nn.BCEWithLogitsLoss() #DiceLoss(weight=torch.FloatTensor(WEIGHTS))
+criterion = CombinedLoss([torch.nn.BCEWithLogitsLoss(), DiceLoss(weight=torch.FloatTensor(WEIGHTS))]) #torch.nn.BCEWithLogitsLoss() #DiceLoss(weight=torch.FloatTensor(WEIGHTS))
 
 
 def train(epoch, loss_list, counter):
