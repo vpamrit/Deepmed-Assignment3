@@ -70,7 +70,8 @@ class SpleenDataset(Dataset):
         self.filtered_set = []
 
         max_skew = 105
-        min_skew = 20
+        min_skew = 20 if skew_start != 0 else 0.0
+
 
 
         #compute the padding here
@@ -206,7 +207,20 @@ class SpleenDataset(Dataset):
 
 
         #update the current object's status
-        return prev_img_slice, img_slice, next_img_slice, img_label
+        return prev_img_slice, img_slice, next_img_slice, img_label, (x, ex, y, ey)
+
+    def fetch_tensor(self, idx):
+        idx = self.filtered_set[idx] #translates from full dataset to filtered data
+
+        prev_img_slice, img_slice, next_img_slice, img_label, coords = self.fetch_slice(idx, SAVE_IMAGES)
+
+        imgcs = torch.from_numpy(img_slice).unsqueeze(0)
+        imgns = torch.from_numpy(next_img_slice).unsqueeze(0)
+        imgps = torch.from_numpy(prev_img_slice).unsqueeze(0)
+        mask = torch.from_numpy(img_label) #already has a third dimension
+
+        return imgps, imgcs, imgns, mask, coords
+
 
     def __len__(self):
         return len(self.filtered_set)
@@ -217,18 +231,9 @@ class SpleenDataset(Dataset):
         if torch.is_tensor(idx):
             idx = idx.tolist()
 
-        idx = self.filtered_set[idx] #translates from full dataset to filtered data
 
         #get the next slice
-        prev_img_slice, img_slice, next_img_slice, img_label = self.fetch_slice(idx, SAVE_IMAGES)
-
-        # convert to tensors
-        imgcs = torch.from_numpy(img_slice).unsqueeze(0)
-        imgns = torch.from_numpy(next_img_slice).unsqueeze(0)
-        imgps = torch.from_numpy(prev_img_slice).unsqueeze(0)
-        mask = torch.from_numpy(img_label) #already has a fourth dimension
-
-        return imgps, imgcs, imgns, mask
+        return self.fetch_tensor(idx)[-1]
 
     def passes_threshold(self, nparray, threshold):
         percent = np.sum(nparray[1] == SPLEEN_VAL) / np.size(nparray[1])
@@ -241,7 +246,7 @@ class SpleenDataset(Dataset):
         self.filtered_set = []
 
         for i in range(self.len):
-            prev, now, nxt, label = self.fetch_slice(i, False)
+            prev, now, nxt, label, coords = self.fetch_slice(i, False)
 
             if threshold == 0 or self.passes_threshold(label, threshold):
                 self.filtered_set.append(i)

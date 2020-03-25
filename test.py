@@ -19,13 +19,14 @@ from config import *
 import numpy as np
 import torchvision
 
-from plain_dice import dice_coeff
+from losses.plain_dice import dice_coeff
 
-from seg_losses import DiceLoss
+from losses.seg_losses import DiceLoss
 from load_data import SpleenDataset
 from torch.autograd import Variable
 from torch.utils.data import DataLoader
 from models.unets import UNet
+from models.deeplabv3 import DeepLabV3
 from PIL import Image
 
 parser = argparse.ArgumentParser(
@@ -39,7 +40,7 @@ parser.add_argument('--test_img_range', type=int, nargs=2, default=[1, 20], help
 args = parser.parse_args()
 
 DATA_FOLDER = args.data_folder
-SAVE_TEST_IMAGES = True
+SAVE_TEST_IMAGES = False
 
 print(args.test_img_range)
 mrange = tuple(args.test_img_range)
@@ -56,29 +57,50 @@ def save_images(img, sample_num, counter, multiplier=1.0, real_img=False, tag=''
         #im = Image.fromarray(nparray)
 
         pil_img = torchvision.transforms.functional.to_pil_image(new_arr, mode='L')
-
-
         pil_img.save('./gen/'+ tag + '_img_'+ str(i+1) + '_' + str(counter) + '.png')
 
 for i in range(mrange[0], mrange[1]+1):
-    dset_test = dset_train = SpleenDataset(DATA_FOLDER, tuple([i, i]), SLICE_SIZE, 80, 5,classes=CLASSES) #will this fail due to different size?
+    dset_test = dset_train = SpleenDataset(DATA_FOLDER, tuple([i, i]), SLICE_SIZE, 80, 5, classes=CLASSES, skew_start=0.0, threshold=0.005) #will this fail due to different size?
     test_loader = DataLoader(dset_train, batch_size=1, num_workers=1)
 
     # load the model
-    model = UNet(num_classes = len(CLASSES) + 1)
+    model = DeepLabV3(num_classes = len(CLASSES) + 1)
     model.load_state_dict(torch.load(args.model_folder))
     model.cuda()
     model.eval()
 
+    side_length = 512 + dset_test.padding
+
+    # initialize our holder and our counter
+    mimage = torch.Tensor()
+
     counter = 0
-    for batch_idx, (image1, image2, image3, mask) in enumerate(test_loader):
+    for i in range(len(dset_test)):
         with torch.no_grad():
-            image1, image2, image3, mask = image1.cuda(), image2.cuda(), image3.cuda(), mask.cuda()
+
+            # a new function we implement "fetch_tensor"
+            image1, image2, image3, mask, coords = dset_test.fetch_tensor(i)
+            image2, mask = torch.cat((image1, image2, image3), dim=0).unsqueeze_(0).cuda(),mask.unsqueeze_(0).cuda()
+
             #output = image2
-            output = model(image2)
+            output = torch.nn.functional.sigmoid(model(image2)) # force between 0 and 1
+            output = (output.round() > 0.5).int()
+
+            print(output.size())
+            print(mask.size())
+
+            # if the counter is divisible by 3
+            if counter % 9 == 10:
+                # new slice
+                mslice = torch.Tensor([side_length, side_length])
+
+            # calculate the upper left quadrant for the image (look at load_data code) => actually store here (maybe add a new function that returns coords => part of fetch?)
+
 
             # let us try saving it :)
             if SAVE_TEST_IMAGES:
-                save_images(output, i, counter, 255.0, real_img=True)
+                save_images(output, i, counter, 255.0)
                 save_images(mask, i, counter, 255.0, tag='mask')
-                counter += 1
+
+            counter += 1
+
