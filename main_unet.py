@@ -205,7 +205,7 @@ for i in tqdm(range(args.epochs)):
     train(i, loss_list, counter)
     torch.save(model.state_dict(), SAVE_DIR + 'unet-final-{}'.format(i))
 
-    if i % 5:
+    if (i+1) % 5 == 0:
         THRESHOLD = THRESHOLD / 2 if THRESHOLD > 0.005 else 0
         dset_train.clean(THRESHOLD)
         dset_valid.clean(THRESHOLD)
