@@ -25,7 +25,7 @@ from seg_losses import DiceLoss
 from load_data import SpleenDataset
 from torch.autograd import Variable
 from torch.utils.data import DataLoader
-from models import UNet
+from models.unets import UNet
 from PIL import Image
 
 parser = argparse.ArgumentParser(
