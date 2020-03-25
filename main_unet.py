@@ -85,6 +85,8 @@ print("Validation Data :", len(valid_loader.dataset))
 # %% Loading in the model
 num_classes = len(CLASSES)+1
 model = DeepLabV3(num_classes = num_classes) #UNet(num_classes=num_classes)
+V3 = True
+
 model.cuda()
 
 if args.optimizer == 'SGD':
@@ -112,6 +114,10 @@ def train(epoch, loss_list, counter):
             Variable(image2), \
             Variable(image3), \
             Variable(mask)
+
+        if V3:
+            #combine all three
+            image2 = torch.cat([image1, image2, image3], dim=1)
 
         optimizer.zero_grad()
 
@@ -150,6 +156,8 @@ def train(epoch, loss_list, counter):
         with torch.no_grad():
             image1, image2, image3, mask = image1.cuda(), image2.cuda(), image3.cuda(), mask.cuda()
 
+            if V3:
+                image2 = torch.cat([image1, image2, image3], dim=1)
 
             output = model(image2)
 
