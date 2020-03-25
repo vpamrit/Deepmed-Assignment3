@@ -75,8 +75,8 @@ THRESHOLD = 0.01
 dset_train = SpleenDataset(DATA_FOLDER, tuple(args.train_img_range), SLICE_SIZE, 150, 3, classes=CLASSES, threshold=THRESHOLD)
 dset_valid = SpleenDataset(DATA_FOLDER, tuple(args.valid_img_range), SLICE_SIZE, 150, 3, classes=CLASSES, threshold=THRESHOLD)
 
-train_loader = DataLoader(dset_train, batch_size=args.batch_size, num_workers=4, shuffle=True)
-valid_loader = DataLoader(dset_valid, batch_size=args.batch_size, num_workers=4)
+train_loader = DataLoader(dset_train, batch_size=args.batch_size, num_workers=4, shuffle=True, drop_last=True)
+valid_loader = DataLoader(dset_valid, batch_size=args.batch_size, num_workers=4, drop_last=True)
 
 
 print("Training Data : ", len(train_loader.dataset))
@@ -111,17 +111,14 @@ def train(epoch, loss_list, counter):
                 mask.cuda()
         if V3:
             #combine all three
-            print(image1.size())
-            print(image2.size())
-            print(image3.size())
             image2 = torch.cat([image1, image2, image3], dim=1)
 
         optimizer.zero_grad()
+        print(image2.size())
         output = model(image2)
 
         #print("Mask size is {} Output size is {}".format(mask.size(), output.size()))
         #need to ignore padding border here (for loss)
-        padding = dset_train.padding
         loss = criterion(output, mask)
 
         loss.backward()
