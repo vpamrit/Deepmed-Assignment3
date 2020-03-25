@@ -207,8 +207,8 @@ for i in tqdm(range(args.epochs)):
     train(i, loss_list, counter)
     torch.save(model.state_dict(), SAVE_DIR + 'deeplabv3-final-{}.pth'.format(i))
 
-    if (i+1) % 5 == 0:
-        THRESHOLD = THRESHOLD / 2 if THRESHOLD > 0.005 else 0
+    if (i+1) % 6 == 0:
+        THRESHOLD = THRESHOLD / 2 if THRESHOLD > 0.005 else 0.00
         dset_train.clean(THRESHOLD)
         dset_valid.clean(THRESHOLD)
 
