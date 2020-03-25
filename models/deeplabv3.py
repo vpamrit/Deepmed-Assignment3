@@ -13,7 +13,7 @@ class DeepLabV3(nn.Module):
     def __init__(self, num_classes, model_id=None, project_dir=None):
         super(DeepLabV3, self).__init__()
 
-        self.num_classes = 20
+        self.num_classes = num_classes
 
         self.model_id = model_id
         self.project_dir = project_dir
