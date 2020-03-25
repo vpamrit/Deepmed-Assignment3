@@ -231,9 +231,8 @@ class SpleenDataset(Dataset):
         if torch.is_tensor(idx):
             idx = idx.tolist()
 
-
         #get the next slice
-        return self.fetch_tensor(idx)[-1]
+        return self.fetch_tensor(idx)[:-1]
 
     def passes_threshold(self, nparray, threshold):
         percent = np.sum(nparray[1] == SPLEEN_VAL) / np.size(nparray[1])
