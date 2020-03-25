@@ -4,7 +4,7 @@ import torch
 
 
 class UNet(nn.Module):
-    def __init__(self, num_channels=1, num_classes=2, return_features=True):
+    def __init__(self, num_channels=1, num_classes=2, return_features=False):
         self.return_features = return_features
         super(UNet, self).__init__()
         num_feat = [64, 128, 256, 512, 1024]
