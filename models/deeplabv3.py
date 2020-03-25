@@ -19,7 +19,7 @@ class DeepLabV3(nn.Module):
         self.project_dir = project_dir
         #self.create_model_dirs()
 
-        self.resnet = ResNet50_OS8() # NOTE! specify the type of ResNet here
+        self.resnet = ResNet50_OS16() # NOTE! specify the type of ResNet here
         self.aspp = ASPP_Bottleneck(num_classes=self.num_classes) # NOTE! if you use ResNet50-152, set self.aspp = ASPP_Bottleneck(num_classes=self.num_classes) instead
 
     def forward(self, x):
