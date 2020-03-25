@@ -28,7 +28,8 @@ from losses.combined_loss import CombinedLoss
 from load_data import SpleenDataset
 from torch.autograd import Variable
 from torch.utils.data import DataLoader
-from models import UNet
+from models.unets import UNet
+from models.deeplabv3 import DeepLabV3
 
 
 # %% import transforms
@@ -82,7 +83,8 @@ print("Training Data : ", len(train_loader.dataset))
 print("Validation Data :", len(valid_loader.dataset))
 
 # %% Loading in the model
-model = UNet(num_classes=len(CLASSES)+1)
+num_classes = len(CLASSES)+1
+model = DeepLabV3(num_classes = num_classes) #UNet(num_classes=num_classes)
 model.cuda()
 
 if args.optimizer == 'SGD':
@@ -94,7 +96,7 @@ if args.optimizer == 'ADAM':
 
 
 # Defining Loss Function
-criterion = CombinedLoss([torch.nn.BCELoss(), DiceLoss()]) #GDiceLoss() #DiceLoss(weight=torch.FloatTensor(WEIGHTS))
+criterion = torch.nn.BCEWithLogitsLoss() #CombinedLoss([torch.nn.BCELoss(), DiceLoss()]) #DiceLoss(weight=torch.FloatTensor(WEIGHTS))
 
 
 def train(epoch, loss_list, counter):
@@ -205,7 +207,7 @@ for i in tqdm(range(args.epochs)):
     train(i, loss_list, counter)
     torch.save(model.state_dict(), SAVE_DIR + 'unet-final-{}'.format(i))
 
-    if (i+1) % 5 == 0:
+    if (i+1) % 12 == 0:
         THRESHOLD = THRESHOLD / 2 if THRESHOLD > 0.005 else 0
         dset_train.clean(THRESHOLD)
         dset_valid.clean(THRESHOLD)
