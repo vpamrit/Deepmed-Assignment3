@@ -218,7 +218,7 @@ def save_create_plot(loss_list, plot_name):
                                                       args.lr))
 
 
-loss_list = [[], [], []]
+loss_list = [[1.2], [1.2], [1.2]]
 counter = 0
 
 
