@@ -215,6 +215,7 @@ def save_create_plot(loss_list, plot_name):
     plt.xlabel("Number of iterations")
     plt.ylabel("Loss")
     plt.savefig("./{}_Loss_bs={}_lr={}.png".format(plot_name, args.batch_size, args.lr))
+    plt.clf()
 
 
 loss_list = [[1.2], [1.2], [1.2]]
