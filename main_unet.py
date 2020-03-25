@@ -109,18 +109,14 @@ def train(epoch, loss_list, counter):
                 image2.cuda(), \
                 image3.cuda(), \
                 mask.cuda()
-
-        image1, image2, image3, mask = Variable(image1), \
-            Variable(image2), \
-            Variable(image3), \
-            Variable(mask)
-
         if V3:
             #combine all three
+            print(image1.size())
+            print(image2.size())
+            print(image3.size())
             image2 = torch.cat([image1, image2, image3], dim=1)
 
         optimizer.zero_grad()
-
         output = model(image2)
 
         #print("Mask size is {} Output size is {}".format(mask.size(), output.size()))
