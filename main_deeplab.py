@@ -62,7 +62,7 @@ parser.add_argument('--save', type=str, default='OutMasks', metavar='str',
 parser.add_argument('--modality', type=str, default='flair', metavar='str',
                     help='Modality to use for training (default: flair)')
 parser.add_argument('--optimizer', type=str, default='SGD', metavar='str')
-parser.add_argument('--train_img_range', type=int, nargs=2, default=[0, 24], help='Image range for train')
+parser.add_argument('--train_img_range', type=int, nargs=2, default=[0, 15], help='Image range for train')
 parser.add_argument('--valid_img_range', type=int, nargs=2,  default=[25, 25], help='Image range for train')
 parser.add_argument('--load_model', type=str, default=None, help='Image range for train')
 
@@ -76,8 +76,8 @@ THRESHOLD = 0.01
 dset_train = SpleenDataset(DATA_FOLDER, tuple(args.train_img_range), SLICE_SIZE, 150, 3, classes=CLASSES, threshold=THRESHOLD)
 dset_valid = SpleenDataset(DATA_FOLDER, tuple(args.valid_img_range), SLICE_SIZE, 150, 3, classes=CLASSES, threshold=THRESHOLD)
 
-train_loader = DataLoader(dset_train, batch_size=args.batch_size, num_workers=4, shuffle=True, drop_last=True)
-valid_loader = DataLoader(dset_valid, batch_size=args.batch_size, num_workers=4, drop_last=True)
+train_loader = DataLoader(dset_train, batch_size=args.batch_size, num_workers=3, shuffle=True, drop_last=True)
+valid_loader = DataLoader(dset_valid, batch_size=args.batch_size, num_workers=3, drop_last=True)
 
 
 print("Training Data : ", len(train_loader.dataset))
