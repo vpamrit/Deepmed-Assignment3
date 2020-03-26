@@ -70,7 +70,7 @@ args = parser.parse_args()
 args.cuda = args.cuda and torch.cuda.is_available()
 
 DATA_FOLDER = args.data_folder
-THRESHOLD = 0.006
+THRESHOLD = 0.01
 
 # %% Loading in the Dataset
 dset_train = SpleenDataset(DATA_FOLDER, tuple(args.train_img_range), SLICE_SIZE, 150, 3, classes=CLASSES, threshold=THRESHOLD)
@@ -243,7 +243,7 @@ for i in tqdm(range(args.epochs)):
     torch.save(model.state_dict(), SAVE_DIR + 'deeplabv3-final-{}.pth'.format(i))
 
     if (i+1) % 7 == 0:
-        THRESHOLD = THRESHOLD / 2 if THRESHOLD >= 0.003 else 0.00
+        THRESHOLD = THRESHOLD / 2 if THRESHOLD >= 0.0025 else 0.00
         dset_train.clean(THRESHOLD)
         dset_valid.clean(THRESHOLD)
 
