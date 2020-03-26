@@ -7,6 +7,8 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import os
 import nibabel as nib
+import os
+import statistics as stat
 
 import torch
 import torch.nn as nn
@@ -15,6 +17,8 @@ from torch.autograd import Variable
 from torch.utils.data import DataLoader
 import scipy.io as sio
 import torchvision.transforms as tr
+import config
+
 from tqdm import tqdm
 from config import *
 import numpy as np
@@ -29,6 +33,7 @@ from torch.utils.data import DataLoader
 from models.unets import UNet
 from models.deeplabv3 import DeepLabV3
 from PIL import Image
+from config import *
 
 parser = argparse.ArgumentParser(
      description='UNet + BDCLSTM for BraTS Dataset')
@@ -41,6 +46,7 @@ args = parser.parse_args()
 DATA_FOLDER = args.data_folder
 SAVE_TEST_IMAGES = False #True
 SAVE_TEST_3D = True
+TEST_SAVE_DIR = './results/'
 
 print(args.test_img_range)
 mrange = tuple(args.test_img_range)
@@ -66,8 +72,25 @@ def save_images(img, subject_num, slice_depth, multiplier=1.0, real_img=False, t
     pil_img.save('./gen/'+ tag + '_img_' + str(subject_num) + '_' + str(slice_depth) + '.png')
 
 
-def process_image(tensor):
-    return np.transpose(tensor.numpy(), (1,2,0))
+def get_angry(mten):
+    if mten.size()[0] == 0:
+        return
+
+    value = torch.max(mten).item()
+    print("MAX IS {}".format(value))
+    assert value <= 1.0, "Max value greater than one!"
+
+    return
+
+
+def process_tensor(mten):
+    value = torch.max(mten).item()
+
+    return np.uint8(np.transpose(mten.cpu().numpy(), (1,2,0)))
+
+# start part
+
+dice_vals = []
 
 for sub_num in range(mrange[0], mrange[1]+1):
     dset_test = SpleenDataset(DATA_FOLDER, tuple([sub_num, sub_num]), SLICE_SIZE, 150, 3, classes=CLASSES, skew_start=0.0, threshold=0.0)
@@ -88,6 +111,7 @@ for sub_num in range(mrange[0], mrange[1]+1):
     # place to store the 3D volume
     all_slices = torch.Tensor()
     all_masks = torch.Tensor()
+
 
     for i in range(len(dset_test)):
         with torch.no_grad():
@@ -112,7 +136,13 @@ for sub_num in range(mrange[0], mrange[1]+1):
             if counter+1 == dset_test.total_slices:
                 # get the mask from pure dataset
                 image1p, image2p, image3p, maskp, coordsp = dset_pure.fetch_tensor(slice_depth)
-                maskp = maskp[1, :, :]
+
+                if dset_pure.is_labeled:
+                    maskp = maskp[1, :, :]
+
+                    #mask 3D
+                    prepped_mask = maskp.clone().unsqueeze_(0) # 1 x H x W
+                    all_masks = torch.cat([all_masks, prepped_mask], dim=0) if all_masks.size()[0] else prepped_mask # D x H x W
 
                 #remove padding
                 mslice = mslice[padding:-padding, padding:-padding]
@@ -128,9 +158,6 @@ for sub_num in range(mrange[0], mrange[1]+1):
                 prepped_mslice = mslice.clone().unsqueeze_(0) # 1 x H x W
                 all_slices = torch.cat([all_slices, prepped_mslice], dim=0) if all_slices.size()[0] else prepped_mslice # D x H x W
 
-                #mask 3D
-                prepped_mask = maskp.clone().unsqueeze_(0) # 1 x H x W
-                all_masks = torch.cat([all_masks, prepped_mask], dim=0) if all_masks.size()[0] else prepped_mask # D x H x W
 
                 #compare maskp and mslice
                 if SAVE_TEST_IMAGES:
@@ -146,22 +173,35 @@ for sub_num in range(mrange[0], mrange[1]+1):
 
             counter += 1
 
-    print(all_slices.size())
-    print(all_masks.size())
-
 
     if SAVE_TEST_3D:
     # since the dataset is of size one
         img_name = dset_pure.samples[0].img_name
+        print("SAVING {}".format(img_name))
+
+        og_file = os.path.join(DATA_FOLDER, TRAIN_DIR, IMG_PREFIX + img_name + EXT)
+
+        # load the original file
+        img = nib.load(og_file)
 
         # load the image
+        new_img = nib.Nifti1Image(process_tensor(all_slices), img.get_affine(), img.get_header())
 
-        new_img = nibabel.Nifti1Image(process_tensor(all_slices), img.get_affine(), img.get_header())
-        nibabel.save(new_img, out_file)
 
-        dice = 0
-        print(dice_coeff(all_slices.unsqueeze_(0).cuda(), all_masks.unsqueeze_(0).cuda()))
-        print("DICE IS".format(dice))
+        out_file = TEST_SAVE_DIR + LABEL_PREFIX + img_name + '.nii.gz'
+        nib.save(new_img, out_file)
 
+
+    if dset_pure.is_labeled:
+        dice = dice_coeff(all_slices.unsqueeze_(0).cuda(), all_masks.unsqueeze_(0).cuda()).cpu()
+        mdice = dice.numpy()[0]
+
+        print("DICE IS {}".format(mdice))
+
+        dice_vals.append(mdice)
+
+
+print("Dice vals {}\n".format(dice_vals))
+#print("Std dev {} Mean {} Median {}".format(stat.stdev(dice_vals), stat.mean(dice_vals), stat.median(dice_vals)))
 print("COMPLETE")
 

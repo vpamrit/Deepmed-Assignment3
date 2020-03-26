@@ -13,17 +13,13 @@ from torch.utils.data import Dataset
 from collections import namedtuple
 from torchvision import transforms, utils
 from PIL import Image
+from config import *
 
 from os.path import join, isfile
 from os import listdir
 
 #constants
 SAVE_IMAGES = False
-TRAIN_DIR = 'img/'
-IMG_PREFIX = 'img'
-LABEL_DIR = 'label/'
-LABEL_PREFIX = 'label'
-EXT = '.nii.gz'
 SPLEEN_VAL = 1
 
 def process_image(img_file, padding=0, normalize=True):
@@ -71,6 +67,9 @@ class SpleenDataset(Dataset):
 
         max_skew = 105
         min_skew = 20 if skew_start != 0 else 0.0
+
+        if skew_start == 0.0:
+            skew = 0.0
 
 
 
@@ -176,6 +175,7 @@ class SpleenDataset(Dataset):
         img_slice = cur_sample.img[slice_depth, x:ex, y:ey].astype('float32')
         next_img_slice = cur_sample.img[min(slice_depth + 1, cur_sample.img.shape[0] - 1), x:ex, y:ey].astype('float32')
         img_label = cur_sample.label[slice_depth, x:ex, y:ey] if self.is_labeled else np.array([])
+        tmp_label = img_label
 
         #if we have an image label filter for the spleen
         if img_label.size != 0:

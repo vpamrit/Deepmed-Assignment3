@@ -108,6 +108,9 @@ criterion = CombinedLoss([torch.nn.BCEWithLogitsLoss(), DiceLoss(weight=torch.Fl
 
 def train(epoch, loss_list, counter):
     model.train()
+
+    total_train_loss = 0
+
     for batch_idx, (image1, image2, image3, mask) in enumerate(train_loader):
         if args.cuda:
             image1, image2, image3, mask = image1.cuda(), \
@@ -121,9 +124,11 @@ def train(epoch, loss_list, counter):
         optimizer.zero_grad()
         output = model(image2)
 
+
         #print("Mask size is {} Output size is {}".format(mask.size(), output.size()))
         #need to ignore padding border here (for loss)
         loss = criterion(output, mask)
+        total_train_loss += loss.item()
 
         loss.backward()
         optimizer.step()
@@ -195,21 +200,28 @@ def train(epoch, loss_list, counter):
                     mask_img.save('./gen/mask_img_' + str(counter) + '.png')
                     counter += 1
 
-    avg_loss = total_loss / len(valid_loader.  dataset)
+    avg_loss = total_loss / len(valid_loader.dataset)
+    avg_train_loss = total_train_loss / len(train_loader.dataset)
+
     avg_dice = dice_total / (max(1, count)) #divide by num batches
     avg_3D_dice = dice_coeff(full_mask, full_out)
 
     loss_list[0].append(avg_loss)
     loss_list[1].append(avg_dice)
     loss_list[2].append(avg_3D_dice)
+    loss_list[3].append(avg_train_loss)
 
     print('Validation Epoch:  Avg Loss {}\n'.format(avg_loss))
     print('Dice Coeff Avg {}'.format(avg_dice))
     print('Full 3D Dice Result {}'.format(avg_3D_dice))
 
 
-def save_create_plot(loss_list, plot_name):
-    plt.plot(loss_list)
+def save_create_plot(loss_list, plot_name, loss_list2=None):
+    plt.plot(loss_list, '-r', label='Validation')
+
+    if loss_list2 != None:
+        plt.plot(loss_list, '-b', label='Train')
+
     plt.title("UNet bs={}, ep={}, lr={}".format(args.batch_size,
                                                 i, args.lr))
     plt.xlabel("Number of iterations")
@@ -239,7 +251,7 @@ for i in tqdm(range(args.epochs)):
     counter += 1
 
     # overwrite plot at the end of each iteration
-    save_create_plot(loss_list[0], 'Avg_Loss')
+    save_create_plot(loss_list[0], 'Avg_Loss', loss_list[3])
     save_create_plot(loss_list[1], '2D_ Dice')
     save_create_plot(loss_list[2], '3D_Dice')
 

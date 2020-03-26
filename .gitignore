@@ -8,4 +8,5 @@ data.py
 model/
 pretrained_models/
 saved_models/
+results/
 
