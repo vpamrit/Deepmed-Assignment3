@@ -34,7 +34,7 @@ from models.deeplabv3 import DeepLabV3
 
 # %% Training settings
 parser = argparse.ArgumentParser(
-    description='UNet + BDCLSTM for BraTS Dataset')
+    description='DeepLabV3')
 parser.add_argument('--batch-size', type=int, default=4, metavar='N',
                     help='input batch size for training (default: 64)')
 parser.add_argument('--test-batch-size', type=int, default=1000, metavar='N',

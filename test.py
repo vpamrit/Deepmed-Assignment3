@@ -35,7 +35,7 @@ from PIL import Image
 from config import *
 
 parser = argparse.ArgumentParser(
-     description='UNet + BDCLSTM for BraTS Dataset')
+     description='DeepLabV3')
 parser.add_argument('--model_folder', type=str, default=None, metavar='str',help='model folder to load')
 parser.add_argument('--test_img_range', type=int, nargs=2, default=[1, 20], help='Image range for train')
 parser.add_argument('--data_folder', type=str, default='./data/Training/', help='Image range for test')
