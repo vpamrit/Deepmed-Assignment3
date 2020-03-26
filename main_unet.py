@@ -63,7 +63,7 @@ parser.add_argument('--modality', type=str, default='flair', metavar='str',
                     help='Modality to use for training (default: flair)')
 parser.add_argument('--optimizer', type=str, default='SGD', metavar='str')
 parser.add_argument('--train_img_range', type=int, nargs=2, default=[0, 24], help='Image range for train')
-parser.add_argument('--valid_img_range', type=int, nargs=2,  default=[24, 25], help='Image range for train')
+parser.add_argument('--valid_img_range', type=int, nargs=2,  default=[25, 25], help='Image range for train')
 parser.add_argument('--load_model', type=str, default=None, help='Image range for train')
 
 args = parser.parse_args()
