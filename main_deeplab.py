@@ -230,7 +230,7 @@ def save_create_plot(loss_list, plot_name, loss_list2=None):
     plt.clf()
 
 
-loss_list = [[1.2], [1.2], [1.2]]
+loss_list = [[1.2], [1.2], [1.2], [1.2]]
 counter = 0
 
 
