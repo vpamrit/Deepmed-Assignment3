@@ -21,14 +21,12 @@ import numpy as np
 import torchvision
 
 from losses.plain_dice import dice_coeff
-from losses.other_losses import GDiceLoss
 from losses.seg_losses import DiceLoss
 from losses.combined_loss import CombinedLoss
 
 from load_data import SpleenDataset
 from torch.autograd import Variable
 from torch.utils.data import DataLoader
-from models.unets import UNet
 from models.deeplabv3 import DeepLabV3
 
 
@@ -230,6 +228,7 @@ def save_create_plot(loss_list, plot_name, loss_list2=None):
     plt.clf()
 
 
+# initialize
 loss_list = [[1.2], [1.2], [1.2], [1.2]]
 counter = 0
 

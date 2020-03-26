@@ -30,7 +30,6 @@ from losses.seg_losses import DiceLoss
 from load_data import SpleenDataset
 from torch.autograd import Variable
 from torch.utils.data import DataLoader
-from models.unets import UNet
 from models.deeplabv3 import DeepLabV3
 from PIL import Image
 from config import *
