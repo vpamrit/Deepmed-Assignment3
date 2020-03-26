@@ -204,6 +204,7 @@ def train(epoch, loss_list, counter):
     avg_dice = dice_total / (max(1, count)) #divide by num batches
     avg_3D_dice = dice_coeff(full_mask, full_out)
 
+    print(len(loss_list))
     loss_list[0].append(avg_loss)
     loss_list[1].append(avg_dice)
     loss_list[2].append(avg_3D_dice)
@@ -218,7 +219,7 @@ def save_create_plot(loss_list, plot_name, loss_list2=None):
     plt.plot(loss_list, '-r', label='Validation')
 
     if loss_list2 != None:
-        plt.plot(loss_list, '-b', label='Train')
+        plt.plot(loss_list2, '-b', label='Train')
 
     plt.title("UNet bs={}, ep={}, lr={}".format(args.batch_size,
                                                 i, args.lr))
@@ -228,14 +229,13 @@ def save_create_plot(loss_list, plot_name, loss_list2=None):
     plt.clf()
 
 
-# initialize
-loss_list = [[1.2], [1.2], [1.2], [1.2]]
-counter = 0
 
 
 ## main function
 os.makedirs(SAVE_DIR, exist_ok=True)
 
+loss_list = [[1.2], [1.2], [1.2], [1.2]]
+counter = 0
 
 for i in tqdm(range(args.epochs)):
     train(i, loss_list, counter)
